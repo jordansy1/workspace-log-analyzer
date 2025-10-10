@@ -1,0 +1,65 @@
+agent_name: password_spray_analyzer
+enabled: true
+
+mitre_techniques:
+  - T1110.003  # Brute Force: Password Spray
+
+severity_thresholds:
+  critical:
+    description: "Coordinated password spray campaign"
+    conditions:
+      - "unique_usernames > 100"
+      - "same_password_across_accounts"
+      - "time_window > 1 hour"
+      - "distributed_ips"
+      - "lockout_avoidance_detected"
+
+  high:
+    description: "Active password spray attack"
+    conditions:
+      - "unique_usernames > 50"
+      - "few_passwords_tested < 5"
+      - "time_delays_between_attempts"
+      - "targeting_privileged_accounts"
+
+  medium:
+    description: "Suspected password spray activity"
+    conditions:
+      - "unique_usernames > 20"
+      - "common_passwords_used"
+      - "single_ip OR ip_pool"
+      - "slow_velocity_attack"
+
+  low:
+    description: "Possible reconnaissance or testing"
+    conditions:
+      - "unique_usernames < 20"
+      - "irregular_patterns"
+      - "no_lockouts_triggered"
+      - "low_volume"
+
+llm_settings:
+  model: claude-sonnet-4-20250514
+  temperature: 0.1
+  max_tokens: 4000
+
+attack_patterns:
+  password_spray:
+    indicators:
+      - "many_users_few_passwords"
+      - "lockout_threshold_avoidance"
+      - "time_delays > 30 minutes"
+      - "common_password_patterns"
+
+  sophisticated_spray:
+    indicators:
+      - "distributed_infrastructure"
+      - "rotating_proxies"
+      - "adaptive_timing"
+      - "target_enumeration"
+
+  low_and_slow:
+    indicators:
+      - "extended_time_window > 24 hours"
+      - "minimal_attempts_per_account"
+      - "seasonal_password_patterns"

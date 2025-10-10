@@ -1,0 +1,62 @@
+agent_name: mfa_context_analyzer
+enabled: true
+
+mitre_techniques:
+  - T1556.006  # Modify Authentication Process: MFA
+  - T1621      # MFA Request Generation (Fatigue)
+  - T1111      # MFA Interception
+
+severity_thresholds:
+  critical:
+    description: "Likely session cookie theft or MFA bypass attack"
+    conditions:
+      - "is_2fa_enrolled == true"
+      - "ip_reputation > 70"
+      - "is_tor OR is_hosting"
+      - "new_ip_address OR new_geographic_region"
+
+  high:
+    description: "Policy violation or possible MFA bypass"
+    conditions:
+      - "is_2fa_enrolled == false"
+      - "is_2fa_enforced == true"
+      - "user.is_admin == true"
+
+  medium:
+    description: "New location with moderate risk"
+    conditions:
+      - "is_2fa_enrolled == true"
+      - "ip_reputation 30-50"
+      - "new_geographic_region"
+
+  low:
+    description: "Trusted device scenario"
+    conditions:
+      - "is_2fa_enrolled == true"
+      - "ip_reputation < 30"
+      - "no baseline deviations"
+
+llm_settings:
+  model: claude-sonnet-4-20250514
+  temperature: 0.1
+  max_tokens: 4000
+
+attack_patterns:
+  session_cookie_theft:
+    indicators:
+      - "is_2fa_enrolled == true"
+      - "high IP reputation (>60)"
+      - "new location"
+      - "Tor/VPN usage"
+
+  mfa_bypass_tool:
+    indicators:
+      - "hosting provider IP"
+      - "rapid success after failures"
+      - "unusual user-agent"
+
+  policy_violation:
+    indicators:
+      - "is_2fa_enrolled == false"
+      - "is_2fa_enforced == false"
+      - "privileged account"

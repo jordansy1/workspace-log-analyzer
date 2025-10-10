@@ -1,0 +1,62 @@
+agent_name: failed_login_analyzer
+enabled: true
+
+mitre_techniques:
+  - T1110      # Brute Force
+  - T1110.001  # Brute Force: Password Guessing
+
+severity_thresholds:
+  critical:
+    description: "Active brute force attack in progress"
+    conditions:
+      - "failed_attempts > 50"
+      - "time_window < 10 minutes"
+      - "multiple_usernames OR single_ip"
+      - "high_velocity_attack"
+
+  high:
+    description: "Sustained password guessing attack"
+    conditions:
+      - "failed_attempts > 20"
+      - "time_window < 30 minutes"
+      - "consistent_pattern"
+      - "targeting_privileged_accounts"
+
+  medium:
+    description: "Moderate failed login pattern requiring monitoring"
+    conditions:
+      - "failed_attempts > 10"
+      - "time_window < 1 hour"
+      - "single_source OR distributed_ips"
+
+  low:
+    description: "User error or forgotten password scenario"
+    conditions:
+      - "failed_attempts < 10"
+      - "time_window > 1 hour"
+      - "known_user_ip"
+      - "followed_by_successful_login"
+
+llm_settings:
+  model: claude-sonnet-4-20250514
+  temperature: 0.1
+  max_tokens: 4000
+
+attack_patterns:
+  brute_force:
+    indicators:
+      - "high_failure_rate > 80%"
+      - "rapid_succession < 5 seconds"
+      - "sequential_pattern"
+
+  password_guessing:
+    indicators:
+      - "common_passwords_attempted"
+      - "dictionary_words"
+      - "moderate_velocity"
+
+  legitimate_user_error:
+    indicators:
+      - "low_attempt_count < 5"
+      - "irregular_timing"
+      - "successful_login_after"

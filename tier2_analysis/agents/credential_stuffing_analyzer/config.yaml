@@ -1,0 +1,64 @@
+agent_name: credential_stuffing_analyzer
+enabled: true
+
+mitre_techniques:
+  - T1110.004  # Brute Force: Credential Stuffing
+
+severity_thresholds:
+  critical:
+    description: "Large-scale credential stuffing campaign"
+    conditions:
+      - "unique_usernames > 100"
+      - "time_window < 1 hour"
+      - "distributed_ips"
+      - "automated_tool_signatures"
+      - "high_success_rate > 5%"
+
+  high:
+    description: "Active credential stuffing attack"
+    conditions:
+      - "unique_usernames > 50"
+      - "time_window < 2 hours"
+      - "low_retry_per_username < 3"
+      - "known_breach_list_patterns"
+
+  medium:
+    description: "Suspected credential stuffing activity"
+    conditions:
+      - "unique_usernames > 20"
+      - "time_window < 6 hours"
+      - "single_ip OR small_ip_pool"
+      - "user_agent_rotation"
+
+  low:
+    description: "Possible reconnaissance or low-volume testing"
+    conditions:
+      - "unique_usernames < 20"
+      - "time_window > 6 hours"
+      - "no_successful_logins"
+      - "irregular_timing"
+
+llm_settings:
+  model: claude-sonnet-4-20250514
+  temperature: 0.1
+  max_tokens: 4000
+
+attack_patterns:
+  credential_stuffing:
+    indicators:
+      - "many_usernames"
+      - "single_attempt_per_user"
+      - "distributed_sources"
+      - "known_breach_credentials"
+
+  botnet_attack:
+    indicators:
+      - "residential_proxy_ips"
+      - "rotating_user_agents"
+      - "consistent_timing_patterns"
+
+  manual_testing:
+    indicators:
+      - "low_volume"
+      - "irregular_timing"
+      - "single_ip_source"

@@ -1,0 +1,64 @@
+agent_name: session_analyzer
+enabled: true
+
+mitre_techniques:
+  - T1539  # Steal Web Session Cookie
+  - T1185  # Browser Session Hijacking
+
+severity_thresholds:
+  critical:
+    description: "Active session hijacking detected"
+    conditions:
+      - "concurrent_sessions_different_geolocations"
+      - "session_token_reuse"
+      - "ip_reputation > 70"
+      - "device_fingerprint_mismatch"
+      - "rapid_location_change"
+
+  high:
+    description: "Suspected session token theft"
+    conditions:
+      - "session_reuse_from_new_location"
+      - "user_agent_mismatch"
+      - "vpn_or_tor_usage"
+      - "session_created_elsewhere"
+
+  medium:
+    description: "Anomalous session behavior requiring investigation"
+    conditions:
+      - "concurrent_sessions > 3"
+      - "session_from_new_device"
+      - "unusual_session_duration"
+      - "session_activity_pattern_change"
+
+  low:
+    description: "Normal multi-device usage or session roaming"
+    conditions:
+      - "concurrent_sessions < 3"
+      - "known_devices"
+      - "consistent_user_behavior"
+      - "same_geographic_region"
+
+llm_settings:
+  model: claude-sonnet-4-20250514
+  temperature: 0.1
+  max_tokens: 4000
+
+attack_patterns:
+  session_cookie_theft:
+    indicators:
+      - "session_token_from_new_ip"
+      - "no_authentication_event"
+      - "malicious_ip_reputation"
+
+  browser_hijacking:
+    indicators:
+      - "session_takeover_mid_activity"
+      - "user_agent_change"
+      - "activity_pattern_deviation"
+
+  concurrent_abuse:
+    indicators:
+      - "simultaneous_sessions_impossible_locations"
+      - "time_between_sessions < 5 minutes"
+      - "distance_between_sessions > 500 km"

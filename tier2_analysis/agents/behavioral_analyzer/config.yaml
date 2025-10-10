@@ -1,0 +1,72 @@
+agent_name: behavioral_analyzer
+enabled: true
+
+mitre_techniques:
+  - M1036  # Account Use Policies (UEBA)
+  - T1078  # Valid Accounts - Abnormal Usage
+
+severity_thresholds:
+  critical:
+    description: "Severe baseline deviation indicating compromise"
+    conditions:
+      - "multiple_baseline_deviations > 5"
+      - "off_hours_access AND new_location"
+      - "privilege_escalation_detected"
+      - "unusual_resource_access"
+      - "high_risk_score > 90"
+
+  high:
+    description: "Significant behavioral anomaly"
+    conditions:
+      - "baseline_deviations > 3"
+      - "off_hours_access AND abnormal_activity"
+      - "access_to_sensitive_resources"
+      - "risk_score > 70"
+
+  medium:
+    description: "Moderate behavioral change requiring monitoring"
+    conditions:
+      - "baseline_deviations > 1"
+      - "off_hours_access OR new_device"
+      - "unusual_time_pattern"
+      - "risk_score 40-70"
+
+  low:
+    description: "Minor deviation or legitimate behavior change"
+    conditions:
+      - "single_deviation"
+      - "explainable_pattern"
+      - "consistent_with_role"
+      - "risk_score < 40"
+
+llm_settings:
+  model: claude-sonnet-4-20250514
+  temperature: 0.1
+  max_tokens: 4000
+
+behavioral_indicators:
+  off_hours_access:
+    indicators:
+      - "login_time outside business_hours"
+      - "weekend_or_holiday_access"
+      - "timezone_mismatch"
+
+  abnormal_activity:
+    indicators:
+      - "unusual_resource_access"
+      - "excessive_failed_attempts"
+      - "data_exfiltration_patterns"
+      - "privilege_elevation"
+
+  baseline_deviation:
+    indicators:
+      - "new_geolocation"
+      - "new_device_type"
+      - "unusual_application_access"
+      - "abnormal_data_volume"
+
+analysis_parameters:
+  business_hours_start: 6   # 6 AM
+  business_hours_end: 20    # 8 PM
+  baseline_window_days: 30
+  deviation_threshold: 2.5  # Standard deviations

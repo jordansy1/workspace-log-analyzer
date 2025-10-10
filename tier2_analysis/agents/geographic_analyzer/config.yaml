@@ -1,0 +1,46 @@
+agent_name: geographic_analyzer
+enabled: true
+
+mitre_techniques:
+  - T1078  # Valid Accounts - Impossible Travel
+
+severity_thresholds:
+  critical:
+    description: "Impossible travel pattern detected - physically impossible"
+    conditions:
+      - "distance > 1000 km"
+      - "time_between_logins < 2 hours"
+      - "calculated_velocity > 800 km/h"
+      - "different_countries"
+
+  high:
+    description: "Highly improbable travel pattern"
+    conditions:
+      - "distance > 500 km"
+      - "time_between_logins < 4 hours"
+      - "calculated_velocity > 500 km/h"
+
+  medium:
+    description: "Suspicious geographic pattern requiring investigation"
+    conditions:
+      - "distance > 200 km"
+      - "time_between_logins < 6 hours"
+      - "new_country OR new_continent"
+
+  low:
+    description: "Explainable travel pattern or nearby locations"
+    conditions:
+      - "distance < 200 km"
+      - "reasonable_velocity"
+      - "same_timezone OR adjacent_timezone"
+
+llm_settings:
+  model: claude-sonnet-4-20250514
+  temperature: 0.1
+  max_tokens: 4000
+
+analysis_parameters:
+  max_commercial_flight_speed: 900  # km/h
+  max_reasonable_car_speed: 120     # km/h
+  time_zone_threshold: 3            # hours difference
+  impossible_travel_threshold: 800  # km/h

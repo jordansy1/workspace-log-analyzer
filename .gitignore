@@ -1,0 +1,38 @@
+# Environment variables
+.env
+
+# Google OAuth credentials and tokens
+credentials.json
+token.json
+
+# Output directories
+logs/
+analysis/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Web UI
+web-ui/frontend/node_modules/
+web-ui/frontend/dist/
+web-ui/frontend/.env
+web-ui/backend/temp_token_*.json
+web-ui/backend/__pycache__/
