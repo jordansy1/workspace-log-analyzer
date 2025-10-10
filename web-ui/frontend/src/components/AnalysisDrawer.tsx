@@ -1,4 +1,4 @@
-import { X, AlertTriangle, Shield, MapPin, Clock, User } from 'lucide-react';
+import { X, AlertTriangle, Shield, MapPin, Clock, User, ClipboardList, HelpCircle, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import Button from './Button';
 import type { LogEvent, Anomaly } from '../lib/api';
@@ -73,6 +73,100 @@ export default function AnalysisDrawer({ isOpen, onClose, event, anomaly }: Anal
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Triage Guidance (Tier-1 Analyst Recommendations) */}
+          {anomaly?.triage_guidance && (
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <ClipboardList className="w-5 h-5 text-purple-600" />
+                <h3 className="font-semibold text-purple-900">Triage Guidance</h3>
+                <span
+                  className={`ml-auto px-2 py-0.5 rounded text-xs font-medium ${
+                    anomaly.triage_guidance.priority === 'IMMEDIATE'
+                      ? 'bg-red-600 text-white'
+                      : anomaly.triage_guidance.priority === 'HIGH'
+                      ? 'bg-orange-500 text-white'
+                      : anomaly.triage_guidance.priority === 'MEDIUM'
+                      ? 'bg-yellow-500 text-white'
+                      : 'bg-blue-500 text-white'
+                  }`}
+                >
+                  {anomaly.triage_guidance.priority} PRIORITY
+                </span>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                {/* Severity Rationale */}
+                <div>
+                  <span className="font-medium text-purple-900">Why This Matters:</span>
+                  <p className="mt-1 text-purple-800">
+                    {anomaly.triage_guidance.severity_rationale}
+                  </p>
+                </div>
+
+                {/* Risk Factors */}
+                {anomaly.triage_guidance.risk_factors && Object.keys(anomaly.triage_guidance.risk_factors).length > 0 && (
+                  <div>
+                    <span className="font-medium text-purple-900 block mb-2">Risk Factors:</span>
+                    <div className="space-y-1">
+                      {Object.entries(anomaly.triage_guidance.risk_factors).map(([key, value]) => (
+                        <div key={key} className="flex items-center gap-2 text-xs">
+                          <CheckCircle className={`w-4 h-4 ${value ? 'text-red-600' : 'text-gray-400'}`} />
+                          <span className={value ? 'text-purple-900 font-medium' : 'text-purple-600'}>
+                            {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recommended Actions */}
+                {anomaly.triage_guidance.recommended_actions.length > 0 && (
+                  <div className="pt-3 border-t border-purple-200">
+                    <span className="font-medium text-purple-900 block mb-2">Recommended Actions:</span>
+                    <ol className="space-y-1.5 list-decimal list-inside text-purple-800">
+                      {anomaly.triage_guidance.recommended_actions.map((action, idx) => (
+                        <li key={idx} className="text-xs leading-relaxed">{action}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+
+                {/* Investigation Questions */}
+                {anomaly.triage_guidance.investigation_questions.length > 0 && (
+                  <div className="pt-3 border-purple-200">
+                    <span className="font-medium text-purple-900 flex items-center gap-1 mb-2">
+                      <HelpCircle className="w-4 h-4" />
+                      Investigation Questions:
+                    </span>
+                    <ul className="space-y-1 list-disc list-inside text-purple-800">
+                      {anomaly.triage_guidance.investigation_questions.map((question, idx) => (
+                        <li key={idx} className="text-xs leading-relaxed">{question}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* False Positive Indicators */}
+                {anomaly.triage_guidance.likely_false_positive_if && anomaly.triage_guidance.likely_false_positive_if.length > 0 && (
+                  <div className="pt-3 border-t border-purple-200">
+                    <span className="font-medium text-purple-900 block mb-2">
+                      Likely False Positive If:
+                    </span>
+                    <ul className="space-y-1 text-xs text-purple-700">
+                      {anomaly.triage_guidance.likely_false_positive_if.map((indicator, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="text-purple-400 mt-0.5">→</span>
+                          <span>{indicator}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           )}

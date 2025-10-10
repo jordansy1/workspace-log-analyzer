@@ -66,25 +66,94 @@ def detect_session_anomalies(events: List[Dict[str, Any]], metadata: Dict[str, A
                     ip2 = next_event.get('ip_address')
 
                     if ip1 != ip2:
+                        # Check additional risk signals from Google
+                        google_flagged_suspicious = next_event.get('is_suspicious', False)
+                        challenge_method = next_event.get('login_challenge_method')
+                        login_type = next_event.get('login_type', '')
+
+                        # Get location data if available
+                        loc1 = current.get('enriched_location', {})
+                        loc2 = next_event.get('enriched_location', {})
+
+                        same_city = loc1.get('city') == loc2.get('city') if loc1 and loc2 else False
+                        same_country = loc1.get('country') == loc2.get('country') if loc1 and loc2 else False
+
+                        # Adjust severity based on signals
+                        if google_flagged_suspicious:
+                            severity = 'critical'
+                        elif not same_country:
+                            severity = 'high'
+                        elif same_city:
+                            severity = 'medium'  # Could be legitimate multi-device
+                        else:
+                            severity = 'high'
+
                         anomalies.append({
                             'id': f'ANOM-SESSION-{hash(user) % 1000:03d}',
-                            'type': 'session_hijacking',
-                            'severity': 'high',
+                            'type': 'concurrent_sessions',
+                            'severity': severity,
                             'requires_deep_analysis': True,
                             'sub_agent': 'session_analyzer',
-                            'description': f'Simultaneous access from different IPs for {user} ({time_diff:.0f}s apart)',
+                            'description': f'Concurrent sessions from different IPs for {user} ({time_diff:.0f}s apart)',
                             'evidence': {
                                 'user': user,
                                 'ip_addresses': [ip1, ip2],
-                                'time_diff_seconds': time_diff,
+                                'time_diff_seconds': round(time_diff, 1),
+                                'google_flagged_suspicious': google_flagged_suspicious,
+                                'challenge_method_used': challenge_method,
+                                'login_type': login_type,
+                                'location_comparison': {
+                                    'same_city': same_city,
+                                    'same_country': same_country,
+                                    'first_location': {
+                                        'city': loc1.get('city'),
+                                        'country': loc1.get('country'),
+                                        'ip': ip1
+                                    },
+                                    'second_location': {
+                                        'city': loc2.get('city'),
+                                        'country': loc2.get('country'),
+                                        'ip': ip2
+                                    }
+                                },
                                 'events': [current, next_event]
+                            },
+                            'triage_guidance': {
+                                'priority': 'HIGH' if google_flagged_suspicious else 'MEDIUM',
+                                'severity_rationale': f'Concurrent sessions {time_diff:.0f}s apart from different IPs',
+                                'risk_factors': {
+                                    'google_flagged': google_flagged_suspicious,
+                                    'different_countries': not same_country,
+                                    'rapid_succession': time_diff < 60,
+                                    'challenge_presented': challenge_method is not None
+                                },
+                                'recommended_actions': [
+                                    'Verify if user has multiple registered devices',
+                                    'Check if IPs are from same corporate network or VPN',
+                                    'Review user device inventory in Workspace admin',
+                                    'Examine both sessions for suspicious activity patterns',
+                                    'Consider requiring re-authentication if unverified'
+                                ],
+                                'investigation_questions': [
+                                    'Does user regularly work from multiple devices simultaneously?',
+                                    'Are both IPs from known/trusted locations?',
+                                    'Was additional verification required for second login?',
+                                    'Are there signs of automation or bot activity?'
+                                ],
+                                'likely_false_positive_if': [
+                                    'User has both desktop and mobile devices registered',
+                                    'IPs are from same geographic city/region',
+                                    'User is known multi-device power user',
+                                    'Both sessions from same corporate VPN or network'
+                                ]
                             },
                             'context_questions': [
                                 'Could this be legitimate multi-device usage?',
                                 'Are the IPs from same geographic region?',
                                 'Is one IP a known VPN or proxy?',
                                 'Was re-authentication required for the second access?'
-                            ]
+                            ],
+                            'mitre_attack': ['T1078', 'T1539']  # Valid Accounts, Steal Web Session Cookie
                         })
             except Exception:
                 continue

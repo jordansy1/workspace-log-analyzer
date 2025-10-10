@@ -21,7 +21,9 @@ from tier1_detection.detection_methods import (
     detect_mfa_fatigue,
     detect_session_anomalies,
     detect_off_hours_access,
-    detect_account_manipulation
+    detect_account_manipulation,
+    detect_google_suspicious_events,
+    detect_google_session_cookie_hijacking
 )
 
 
@@ -64,69 +66,81 @@ class AnomalyDetector:
         """
         anomalies = []
 
-        print(f"[Tier1Detector] Running {11} detection methods...")
+        print(f"[Tier1Detector] Running {13} detection methods...")
 
-        # Detection 1: Check for missing MFA (T1556.006, T1621, T1111)
+        # Detection 1: Check for Google session cookie hijacking (T1539) - CRITICAL
+        session_cookie_anomalies = detect_google_session_cookie_hijacking(self.events, self.metadata)
+        if session_cookie_anomalies:
+            anomalies.extend(session_cookie_anomalies)
+            print(f"  [+] Session Cookie Hijacking: {len(session_cookie_anomalies)} anomalies (CRITICAL)")
+
+        # Detection 2: Check for Google-flagged suspicious events (T1078)
+        google_suspicious_anomalies = detect_google_suspicious_events(self.events, self.metadata)
+        if google_suspicious_anomalies:
+            anomalies.extend(google_suspicious_anomalies)
+            print(f"  [+] Google Suspicious: {len(google_suspicious_anomalies)} anomalies")
+
+        # Detection 3: Check for missing MFA (T1556.006, T1621, T1111)
         mfa_anomaly = detect_missing_mfa(self.events, self.metadata)
         if mfa_anomaly:
             anomalies.append(mfa_anomaly)
             print(f"  [+] MFA: {mfa_anomaly['id']} ({mfa_anomaly['severity']})")
 
-        # Detection 2: Check for geographic anomalies (T1078)
+        # Detection 4: Check for geographic anomalies (T1078)
         geo_anomalies = detect_geographic_anomalies(self.events, self.metadata)
         if geo_anomalies:
             anomalies.extend(geo_anomalies)
             print(f"  [+] Geographic: {len(geo_anomalies)} anomalies")
 
-        # Detection 3: Check for failed login patterns (T1110)
+        # Detection 5: Check for failed login patterns (T1110)
         failed_login_anomalies = detect_failed_logins(self.events, self.metadata)
         if failed_login_anomalies:
             anomalies.extend(failed_login_anomalies)
             print(f"  [+] Failed Logins: {len(failed_login_anomalies)} anomalies")
 
-        # Detection 4: Check for rapid access patterns (T1110)
+        # Detection 6: Check for rapid access patterns (T1110)
         rapid_access_anomalies = detect_rapid_access(self.events, self.metadata)
         if rapid_access_anomalies:
             anomalies.extend(rapid_access_anomalies)
             print(f"  [+] Rapid Access: {len(rapid_access_anomalies)} anomalies")
 
-        # Detection 5: Credential stuffing detection (T1110.004)
+        # Detection 7: Credential stuffing detection (T1110.004)
         credential_stuffing_anomalies = detect_credential_stuffing(self.events, self.metadata)
         if credential_stuffing_anomalies:
             anomalies.extend(credential_stuffing_anomalies)
             print(f"  [+] Credential Stuffing: {len(credential_stuffing_anomalies)} anomalies")
 
-        # Detection 6: Password spray detection (T1110.003)
+        # Detection 8: Password spray detection (T1110.003)
         password_spray_anomalies = detect_password_spray(self.events, self.metadata)
         if password_spray_anomalies:
             anomalies.extend(password_spray_anomalies)
             print(f"  [+] Password Spray: {len(password_spray_anomalies)} anomalies")
 
-        # Detection 7: Impossible travel detection (enhanced geographic)
+        # Detection 9: Impossible travel detection (enhanced geographic)
         impossible_travel_anomalies = detect_impossible_travel(self.events, self.metadata)
         if impossible_travel_anomalies:
             anomalies.extend(impossible_travel_anomalies)
             print(f"  [+] Impossible Travel: {len(impossible_travel_anomalies)} anomalies")
 
-        # Detection 8: MFA fatigue/bombing detection (T1621)
+        # Detection 10: MFA fatigue/bombing detection (T1621)
         mfa_fatigue_anomalies = detect_mfa_fatigue(self.events, self.metadata)
         if mfa_fatigue_anomalies:
             anomalies.extend(mfa_fatigue_anomalies)
             print(f"  [+] MFA Fatigue: {len(mfa_fatigue_anomalies)} anomalies")
 
-        # Detection 9: Session hijacking detection (T1539, T1185)
+        # Detection 11: Session anomaly detection (T1539, T1185)
         session_anomalies = detect_session_anomalies(self.events, self.metadata)
         if session_anomalies:
             anomalies.extend(session_anomalies)
             print(f"  [+] Session Anomalies: {len(session_anomalies)} anomalies")
 
-        # Detection 10: Off-hours access detection (M1036)
+        # Detection 12: Off-hours access detection (M1036)
         off_hours_anomalies = detect_off_hours_access(self.events, self.metadata)
         if off_hours_anomalies:
             anomalies.extend(off_hours_anomalies)
             print(f"  [+] Off-Hours Access: {len(off_hours_anomalies)} anomalies")
 
-        # Detection 11: Account manipulation detection (T1098)
+        # Detection 13: Account manipulation detection (T1098)
         account_manipulation_anomalies = detect_account_manipulation(self.events, self.metadata)
         if account_manipulation_anomalies:
             anomalies.extend(account_manipulation_anomalies)

@@ -23,6 +23,33 @@ Adversaries obtain and abuse credentials of existing accounts to:
 - Simultaneous access from geographically distant locations
 - Access from cloud/hosting providers (attacker infrastructure)
 
+## Enhanced Risk Signals from Google Workspace
+
+**IMPORTANT: Tier-1 Detection Now Provides Enhanced Metrics**
+
+Your evidence will now include these pre-calculated fields:
+- `speed_kmh`: Required travel speed in km/h (more intuitive than raw distance/time)
+- `google_flagged_suspicious`: Boolean indicating Google's ML flagged the event
+- `required_reauth`: Whether user had to re-authenticate (reduces false positive risk)
+- `challenge_method_used`: Type of additional verification Google required
+
+**Google `is_suspicious` Flag Interpretation:**
+- When `true`: Google's global threat intelligence flagged this event as suspicious
+- High-fidelity signal—Google analyzes patterns across millions of users
+- **Weight heavily** in your risk assessment
+- Common triggers: New device, unusual location, velocity-based anomalies, leaked credential lists
+
+**Re-authentication Signal:**
+- `required_reauth: true` = User had to provide password again (not just session cookie)
+- **Lower risk:** Re-auth suggests Google verified user identity at new location
+- **Higher risk:** No re-auth + impossible travel = possible session hijacking
+- **Context matters:** Legitimate travel often triggers re-auth; attackers with stolen credentials may also pass re-auth
+
+**Challenge Method Signal:**
+- Presence of `challenge_method` (e.g., "google_prompt", "totp") = Google required 2FA
+- **Good sign:** Additional verification was required and passed
+- **Bad sign:** No challenge despite suspicious circumstances = potential security gap
+
 ## Investigation Framework - Think Like a Geolocation Analyst
 
 **Phase 1: Impossible Travel Calculation**

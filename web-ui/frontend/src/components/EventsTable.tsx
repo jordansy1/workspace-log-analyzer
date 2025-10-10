@@ -10,7 +10,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import { useState } from 'react';
-import { ShieldCheck, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, ChevronDown, ChevronUp, Flag, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import Button from './Button';
 import type { LogEvent } from '../lib/api';
@@ -61,13 +61,25 @@ export default function EventsTable({ events, onEventClick }: EventsTableProps) 
       {
         accessorKey: 'event_name',
         header: 'Event Type',
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row }) => {
           const value = getValue() as string;
+
+          // Critical: Session cookie hijacking
+          if (value === 'user_signed_out_due_to_suspicious_session_cookie') {
+            return (
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-600 text-white flex items-center gap-1 inline-flex">
+                <Lock className="w-3 h-3" />
+                Session Hijacking
+              </span>
+            );
+          }
+
           const colors: Record<string, string> = {
             login_success: 'bg-green-100 text-green-800',
             login_failure: 'bg-red-100 text-red-800',
             login_verification: 'bg-blue-100 text-blue-800',
           };
+
           return (
             <span
               className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -78,6 +90,24 @@ export default function EventsTable({ events, onEventClick }: EventsTableProps) 
             </span>
           );
         },
+      },
+      {
+        id: 'google_flag',
+        header: 'Google',
+        accessorKey: 'is_suspicious',
+        cell: ({ getValue }) => {
+          const isSuspicious = getValue() as boolean;
+          if (isSuspicious) {
+            return (
+              <Flag
+                className="w-4 h-4 text-orange-600"
+                title="Flagged as suspicious by Google Workspace"
+              />
+            );
+          }
+          return null;
+        },
+        size: 60,
       },
       {
         accessorKey: 'user_email',

@@ -44,6 +44,7 @@ export interface LogEvent {
   login_type?: string;
   is_suspicious: boolean;
   is_second_factor?: boolean;
+  login_challenge_method?: string;  // NEW: MFA/challenge type used
   network_info?: {
     ip_asn: string;
     region_code: string;
@@ -74,12 +75,22 @@ export interface LogData {
   events: LogEvent[];
 }
 
+export interface TriageGuidance {
+  priority: 'IMMEDIATE' | 'HIGH' | 'MEDIUM' | 'LOW';
+  severity_rationale: string;
+  risk_factors?: Record<string, boolean>;
+  recommended_actions: string[];
+  investigation_questions: string[];
+  likely_false_positive_if?: string[];
+}
+
 export interface Anomaly {
   id: string;
   type: string;
   severity: string;
   description: string;
   is_actual_risk?: boolean;
+  triage_guidance?: TriageGuidance;  // NEW: Tier-1 analyst guidance
   refined_assessment?: {
     is_actual_risk: boolean;
     likely_scenario: string;
@@ -90,6 +101,7 @@ export interface Anomaly {
     key_enriched_factors?: Record<string, any>;
   };
   evidence?: any;
+  mitre_attack?: string[];  // NEW: MITRE ATT&CK technique IDs
 }
 
 export interface AnalysisData {

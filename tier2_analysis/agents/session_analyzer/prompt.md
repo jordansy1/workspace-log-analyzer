@@ -17,6 +17,29 @@ Adversary steals session cookies (often via malware or network sniffing) to bypa
 ### T1185: Browser Session Hijacking
 Adversary injects code into browser process or uses browser extension to inherit authenticated session, cookies, and SSL certificates.
 
+### **CRITICAL: Google-Confirmed Session Cookie Hijacking**
+
+**Event Type:** `user_signed_out_due_to_suspicious_session_cookie`
+
+**What This Means:**
+- Google Workspace's internal ML/security systems detected and **confirmed** session cookie compromise
+- User was automatically signed out as protective measure
+- This is NOT a suspicion—it's a high-confidence confirmed detection
+- Minimal false positive rate (Google has extensive global threat intelligence)
+
+**When You See This Event:**
+- **Skip** the "is this legitimate?" evaluation phase
+- **Assume** compromise occurred
+- **Focus** investigation on: damage assessment, attacker actions, data exfiltration
+- **Priority:** IMMEDIATE response required
+
+**Investigation Checklist for Confirmed Session Cookie Theft:**
+1. What did the attacker access during the hijacked session?
+2. Were any account settings, delegates, or forwarding rules modified?
+3. Was sensitive data (emails, files) accessed or exfiltrated?
+4. Are other accounts at risk from the same attack vector?
+5. What was the infection/theft vector? (Malware, phishing, network sniffing)
+
 ## Investigative Framework
 
 **Legitimate Scenarios to Rule Out:**
@@ -64,6 +87,21 @@ Adversary injects code into browser process or uses browser extension to inherit
    - Attack pattern: Third IP appears mid-session, performs specific high-value actions
    - Timing: Brief access window for targeted action
    - Behavior: Surgical strikes (export data, change settings, create backdoor)
+
+## Enhanced Risk Signals from Google Workspace
+
+**Google `is_suspicious` Flag:**
+- When `google_flagged_suspicious: true` appears in evidence, Google's ML flagged this event as suspicious
+- This is a high-fidelity signal based on Google's global threat intelligence and behavioral analysis
+- Substantially increases risk assessment—Google sees patterns across millions of users
+- **Weighting:** Treat Google-flagged events as higher priority than unflagged events with similar characteristics
+
+**Authentication Challenge Signals:**
+- `challenge_method_used`: Presence indicates Google required additional verification (MFA prompt, CAPTCHA, etc.)
+- **Good sign:** Challenges presented = Google detected risk and required verification
+- **Bad sign:** No challenge on suspicious event = potential bypass or compromised second factor
+- `required_reauth`: User had to re-authenticate (not just session continuation)
+- **Context:** Re-auth required often indicates Google detected session anomaly
 
 ## Critical Indicators to Evaluate
 

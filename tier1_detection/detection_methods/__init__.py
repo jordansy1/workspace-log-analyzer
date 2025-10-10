@@ -16,6 +16,8 @@ from tier1_detection.detection_methods.mfa_fatigue_detection import detect_mfa_f
 from tier1_detection.detection_methods.session_detection import detect_session_anomalies
 from tier1_detection.detection_methods.off_hours_detection import detect_off_hours_access
 from tier1_detection.detection_methods.account_manipulation_detection import detect_account_manipulation
+from tier1_detection.detection_methods.google_suspicious_detection import detect_google_suspicious_events
+from tier1_detection.detection_methods.google_session_cookie_detection import detect_google_session_cookie_hijacking
 
 __all__ = [
     'detect_missing_mfa',
@@ -28,5 +30,7 @@ __all__ = [
     'detect_mfa_fatigue',
     'detect_session_anomalies',
     'detect_off_hours_access',
-    'detect_account_manipulation'
+    'detect_account_manipulation',
+    'detect_google_suspicious_events',
+    'detect_google_session_cookie_hijacking'
 ]
