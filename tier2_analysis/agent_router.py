@@ -2,6 +2,7 @@
 Agent Router - Routes Anomalies to Appropriate Sub-Agents
 
 Maps tier-1 detected anomalies to specialized tier-2 analysis agents.
+Provides business context to agents for more accurate risk assessment.
 """
 
 from typing import Dict, Any
@@ -14,6 +15,7 @@ from tier2_analysis.agents import (
     SessionAgent,
     BehavioralAgent
 )
+from config import format_context_for_agent
 
 
 class AgentRouter:
@@ -25,7 +27,7 @@ class AgentRouter:
     """
 
     def __init__(self):
-        """Initialize router with all available agents."""
+        """Initialize router with all available agents and load business context."""
         self.agents = {
             'mfa_context_analyzer': MFAContextAgent(),
             'geographic_analyzer': GeographicAgent(),
@@ -35,6 +37,14 @@ class AgentRouter:
             'session_analyzer': SessionAgent(),
             'behavioral_analyzer': BehavioralAgent(),
         }
+
+        # Load business context for agents
+        try:
+            self.business_context = format_context_for_agent()
+            print(f"[AgentRouter] Loaded business context configuration")
+        except Exception as e:
+            print(f"[AgentRouter WARNING] Could not load business context: {e}")
+            self.business_context = None
 
         print(f"[AgentRouter] Initialized with {len(self.agents)} agents")
         for name, agent in self.agents.items():
@@ -74,6 +84,9 @@ class AgentRouter:
         """
         Route anomaly to appropriate agent and execute analysis.
 
+        Includes business context in the enriched_context to help agents make
+        better risk assessments based on organizational patterns.
+
         Args:
             anomaly: Detected anomaly from tier-1
             enriched_context: Enriched data (IP reputation, geolocation, user context)
@@ -88,6 +101,10 @@ class AgentRouter:
         try:
             agent = self.route(anomaly)
             print(f"[AgentRouter] Routing {anomaly.get('id')} -> {agent.name}")
+
+            # Add business context to enriched context
+            if self.business_context:
+                enriched_context['business_context'] = self.business_context
 
             result = agent.analyze(anomaly, enriched_context)
 

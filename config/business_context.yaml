@@ -1,0 +1,107 @@
+# Business Context Configuration
+#
+# Define your organization's "normal" behavior patterns to improve threat detection.
+# All fields are OPTIONAL - provide only what's relevant to your environment.
+# The more context you provide, the more accurate the analysis becomes.
+#
+# See business_context.yaml.example for a comprehensive template with all options.
+
+# ==============================================================================
+# TIER 1 DETECTION PARAMETERS (Optional)
+# ==============================================================================
+# Thresholds used by deterministic detection methods.
+# If not specified, reasonable defaults will be used.
+
+tier1_parameters:
+
+  # Business Hours (Optional)
+  # Define when your organization typically operates
+  business_hours:
+    primary_timezone: "America/New_York"
+    weekday_start: "08:00"
+    weekday_end: "18:00"
+
+    # Uncomment to add additional office timezones:
+    # additional_timezones:
+    #   "Europe/London":
+    #     weekday_start: "09:00"
+    #     weekday_end: "17:00"
+
+    # Uncomment to specify holidays (YYYY-MM-DD format):
+    # holidays:
+    #   - "2025-12-25"
+
+  # Geographic Patterns (Optional)
+  # Define expected access locations
+  # geographic:
+  #   expected_countries:
+  #     - "United States"
+  #   office_ip_ranges:
+  #     - "203.0.113.0/24"
+
+  # Detection Thresholds (Optional)
+  # Uncomment and customize as needed:
+
+  # failed_logins:
+  #   max_failed_attempts: 5
+  #   time_window_minutes: 30
+
+  # password_spray:
+  #   min_unique_users: 5
+  #   time_window_minutes: 60
+
+  # mfa_fatigue:
+  #   min_challenges: 5
+  #   time_window_minutes: 30
+
+# ==============================================================================
+# TIER 2 AI AGENT CONTEXT (Optional)
+# ==============================================================================
+# Business intelligence to help AI agents assess risk.
+# Provide as much or as little detail as you want.
+
+tier2_context:
+
+  # Organization Profile (Optional)
+  organization:
+    name: "Your Organization"
+    industry: "Technology"
+    # size: "Medium"
+    # description: "Add details about your business..."
+
+  # Workforce Characteristics (Optional)
+  # workforce:
+  #   remote_work_policy: "Hybrid"
+  #   common_patterns:
+  #     - "Engineering team works flexible hours"
+  #   legitimate_edge_cases:
+  #     - "Sales team travels frequently"
+
+  # User Role Expectations (Optional)
+  # user_roles:
+  #   engineers:
+  #     off_hours_access: "Common"
+  #     notes: "Frequently work late nights during releases"
+  #   sales:
+  #     travel_frequency: "High"
+  #     international_access: true
+
+  # Known Threats (Optional)
+  # threat_context:
+  #   known_threats:
+  #     - "Phishing campaigns targeting employees"
+
+  # Risk Profile (Optional)
+  # risk_profile:
+  #   risk_tolerance: "Low"
+  #   false_positive_tolerance: "Low"
+
+# ==============================================================================
+# TUNING LOG (Optional)
+# ==============================================================================
+# Document your configuration changes over time
+
+# tuning_log:
+#   - date: "2025-01-15"
+#     change: "Initial configuration"
+#     notes: "Starting with minimal config"

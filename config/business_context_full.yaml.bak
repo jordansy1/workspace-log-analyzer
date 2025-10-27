@@ -1,0 +1,321 @@
+# Business Context Configuration
+#
+# This file defines "normal" business behavior patterns to help both tier-1 detections
+# and tier-2 AI agents distinguish between legitimate activity and potential threats.
+#
+# Update this configuration as you learn more about your organization's access patterns.
+# More detailed context = more accurate threat detection and fewer false positives.
+
+# ==============================================================================
+# TIER 1 DETECTION PARAMETERS
+# ==============================================================================
+# These thresholds and patterns are used by deterministic detection methods
+
+tier1_parameters:
+
+  # Normal Business Hours Detection (M1036)
+  # Used by: M1036_off_hours_access_detection.py
+  business_hours:
+    # Primary business timezone
+    primary_timezone: "America/New_York"
+
+    # Normal operating hours (24-hour format, in primary timezone)
+    weekday_start: "08:00"
+    weekday_end: "18:00"
+
+    weekend_start: null  # null = weekends are considered off-hours
+    weekend_end: null
+
+    # Additional valid timezones for distributed teams
+    # Format: {timezone: {description, weekday_start, weekday_end}}
+    additional_timezones:
+      "America/Los_Angeles":
+        description: "West Coast Office"
+        weekday_start: "08:00"
+        weekday_end: "18:00"
+      "Europe/London":
+        description: "London Office"
+        weekday_start: "09:00"
+        weekday_end: "17:00"
+
+    # Observed holidays (dates when business is closed)
+    # Format: YYYY-MM-DD
+    holidays:
+      - "2025-01-01"  # New Year's Day
+      - "2025-07-04"  # Independence Day
+      - "2025-12-25"  # Christmas
+
+  # Geographic Access Patterns (T1078)
+  # Used by: T1078_geographic_anomalies_detection.py, T1078_impossible_travel_detection.py
+  geographic:
+    # Expected countries for normal business access
+    expected_countries:
+      - "United States"
+      
+
+    # Expected cities/regions (optional - leave empty for country-level only)
+    expected_cities:
+      - "New York, NY, USA"
+      
+
+    # Known office IP ranges (CIDR notation)
+    office_ip_ranges:
+        # HQ Office
+        # Remote Office
+
+    # VPN/Proxy IP ranges (these may show unusual locations)
+    vpn_ip_ranges:
+       # Corporate VPN
+
+  # Failed Login Thresholds (T1110)
+  # Used by: T1110_failed_login_detection.py
+  failed_logins:
+    # Maximum failed attempts before flagging as suspicious
+    max_failed_attempts: 5
+
+    # Time window for counting failures (minutes)
+    time_window_minutes: 30
+
+    # Flag any failures from known-bad IP reputation scores below this threshold
+    min_safe_ip_reputation: 50  # 0-100 scale
+
+  # Password Spray Detection (T1110.003)
+  # Used by: T1110_003_password_spray_detection.py
+  password_spray:
+    # Minimum unique users targeted to flag as spray
+    min_unique_users: 1
+
+    # Time window for detecting spray pattern (minutes)
+    time_window_minutes: 60
+
+    # Minimum attempts per user in a spray
+    min_attempts_per_user: 1
+
+  # Credential Stuffing Detection (T1110.004)
+  # Used by: T1110_004_credential_stuffing_detection.py
+  credential_stuffing:
+    # Minimum failed logins from same IP to flag
+    min_failures_from_ip: 3
+
+    # Require multiple users targeted
+    min_unique_users: 2
+
+    # Time window (minutes)
+    time_window_minutes: 30
+
+  # Rapid Access Detection (T1110)
+  # Used by: T1110_rapid_access_detection.py
+  rapid_access:
+    # Maximum login attempts in time window
+    max_attempts: 10
+
+    # Time window (minutes)
+    time_window_minutes: 5
+
+  # MFA Fatigue Detection (T1621)
+  # Used by: T1621_mfa_fatigue_detection.py
+  mfa_fatigue:
+    # Minimum MFA challenges to flag as fatigue attack
+    min_challenges: 5
+
+    # Time window (minutes)
+    time_window_minutes: 30
+
+    # Flag if MFA eventually succeeds after many denials
+    flag_eventual_success: true
+
+  # Session Anomaly Detection (T1539)
+  # Used by: T1539_session_anomalies_detection.py
+  session_anomalies:
+    # Flag sessions with multiple concurrent IPs
+    flag_concurrent_ips: true
+
+    # Flag rapid location changes (impossible travel)
+    flag_rapid_location_change: true
+
+    # Minimum session duration to analyze (seconds)
+    min_session_duration: 300
+
+# ==============================================================================
+# TIER 2 AI AGENT CONTEXT
+# ==============================================================================
+# Rich contextual information to help AI agents make better risk assessments
+
+tier2_context:
+
+  # Organization Profile
+  organization:
+    name: "Your Organization Name"
+    industry: "Technology"  # e.g., Finance, Healthcare, Technology, Retail
+    size: "Medium"  # Small (<50), Medium (50-500), Large (500+)
+    description: |
+      Brief description of your organization and what it does.
+      This helps agents understand the business context for access patterns.
+
+  # Workforce Characteristics
+  workforce:
+    # General workforce distribution
+    remote_work_policy: "Hybrid"  # Options: Office-Only, Remote-First, Hybrid, Fully-Remote
+
+    # Percentage of workforce in each category (should sum to ~100)
+    workforce_distribution:
+      office_based: 0
+      remote_domestic: 100
+      remote_international: 0
+      frequent_travelers: 0
+
+    # Common legitimate access patterns
+    common_patterns:
+      - "Sales team frequently accesses from airports and hotels"
+      - "Engineering team works flexible hours, including late nights"
+      - "Customer support team operates 24/7 with shift workers"
+      - "Executive team travels internationally 2-3 times per month"
+
+    # Known legitimate scenarios that might look suspicious
+    legitimate_edge_cases:
+      - "Employees on business travel may access from unusual countries"
+      - "Customer success team shares screens during demos (multiple sessions)"
+      - "IT administrators access from home networks during on-call rotations"
+      - "International contractors access from expected foreign locations"
+
+  # Technology Environment
+  technology:
+    # Authentication methods in use
+    authentication_methods:
+      - "Google Workspace SSO"
+  
+
+    # Security tools and policies
+    security_posture:
+      mfa_required: true
+      mfa_enforcement: "All users"  # Options: All users, Admins only, Optional
+      password_policy: "Strong (12+ chars, complexity required)"
+      session_timeout_minutes: 480  # 8 hours
+
+      # IP allowlisting (if applicable)
+      ip_allowlist_enabled: false
+
+      # Device management
+      device_management: "Partial"  # Options: None, Partial, Full MDM
+
+    # Third-party integrations that generate login events
+    integrations:
+      - name: "GitHub"
+        description: "Engineering team uses SSO for code repositories"
+
+  # User Role Context
+  user_roles:
+    # Define expected behaviors by role
+    executives:
+      travel_frequency: "High"
+      international_access: true
+      off_hours_access: "Common"
+      expected_locations: ["US"]
+
+    engineers:
+      travel_frequency: "Low"
+      international_access: false
+      off_hours_access: "Common"
+      expected_locations: ["US"]
+      notes: "Frequently work late nights and weekends during releases"
+
+    sales:
+      travel_frequency: "Very High"
+      international_access: true
+      off_hours_access: "Moderate"
+      expected_locations: ["US", "UK", "Germany", "France"]
+      notes: "Access from airports, hotels, customer sites"
+
+    support:
+      travel_frequency: "Low"
+      international_access: false
+      off_hours_access: "Very Common"
+      expected_locations: ["US", "Philippines", "India"]
+      notes: "24/7 shifts, including nights and weekends"
+
+    contractors:
+      travel_frequency: "Low"
+      international_access: true
+      off_hours_access: "Moderate"
+      expected_locations: ["India", "Ukraine", "Argentina"]
+      notes: "Fixed locations but may be in different timezones"
+
+  # Known Threats and Past Incidents
+  threat_context:
+    # Industries or threat actors that commonly target your sector
+    known_threats:
+      - "Phishing campaigns targeting employees with admin access"
+      - "Credential stuffing attacks from residential proxies"
+      - "Social engineering attempts during business hours"
+
+    # Past security incidents (helps identify patterns)
+    past_incidents:
+      - date: "2024-08-15"
+        type: "Credential stuffing"
+        description: "Automated login attempts from botnet IPs"
+        outcome: "Blocked by rate limiting"
+
+      - date: "2024-06-20"
+        type: "Phishing"
+        description: "Employee credentials compromised via phishing email"
+        outcome: "MFA prevented account takeover"
+
+    # Current threat intelligence
+    active_campaigns:
+      - "Increased phishing targeting finance departments (2024-Q4)"
+      - "Password spray campaigns against Google Workspace accounts"
+
+  # Risk Tolerance and Response
+  risk_profile:
+    # Overall security stance
+    risk_tolerance: "Low"  # Options: Very Low, Low, Moderate, High
+
+    # Severity escalation guidance
+    severity_guidance:
+      critical: "Immediate response required - potential active breach"
+      high: "Urgent investigation - likely policy violation or attack"
+      medium: "Timely review - unusual but may have legitimate explanation"
+      low: "Monitor - document pattern for future reference"
+
+    # False positive tolerance
+    false_positive_tolerance: "Low"  # Prefer to investigate more vs. miss threats
+
+  # Compliance and Regulatory Requirements
+  compliance:
+    frameworks:
+      - "SOC 2 Type II"
+      - "GDPR"
+
+    requirements:
+      - "All access from outside US must be logged and reviewed"
+      - "Failed login attempts must be investigated within 24 hours"
+      - "Admin account access must be from trusted devices only"
+
+  # Seasonal and Temporal Patterns
+  seasonal_patterns:
+    - period: "November-December"
+      description: "Holiday season - increased retail activity, some remote work from family locations"
+      expected_changes: "More varied geographic access, some off-hours activity"
+
+    - period: "January"
+      description: "New year planning - all-hands meetings, strategy sessions"
+      expected_changes: "Higher than normal access, some weekend work"
+
+    - period: "Q4 (Oct-Dec)"
+      description: "End of fiscal year - sales push, financial close"
+      expected_changes: "Extended hours for finance and sales teams"
+
+# ==============================================================================
+# TUNING NOTES
+# ==============================================================================
+# Document your configuration changes and observations here
+
+tuning_log:
+  - date: "2025-01-15"
+    change: "Initial configuration created"
+    notes: "Starting with conservative thresholds"
+
+  # Add entries as you tune:
+  # - date: "2025-02-01"
+  #   change: "Increased failed_logins.max_failed_attempts from 3 to 5"
+  #   notes: "Too many false positives from mobile users with typos"
