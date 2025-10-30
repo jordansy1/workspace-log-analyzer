@@ -1,0 +1,31 @@
+name: "OAuth Token Security Analyzer"
+description: "Specialized agent for analyzing OAuth token abuse, malicious apps, and token theft patterns"
+version: "1.0.0"
+
+# Anomaly types this agent handles
+anomaly_patterns:
+  - "T1550.001"  # OAuth token abuse
+  - "T1528"      # Steal OAuth token
+  - "T1098.001"  # Malicious OAuth app
+  - "oauth"      # Generic OAuth patterns
+  - "token"      # Token-related anomalies
+
+# Analysis capabilities
+capabilities:
+  - OAuth app reputation assessment
+  - Scope permission analysis
+  - Token usage pattern analysis
+  - Phishing campaign detection
+  - App publisher verification guidance
+  - OAuth security policy recommendations
+
+# Required enrichment data
+required_enrichment:
+  - ip_reputation
+  - geolocation
+  - user_context
+
+# Optional enrichment data (improves analysis if available)
+optional_enrichment:
+  - historical_baseline
+  - user_behavior_profile

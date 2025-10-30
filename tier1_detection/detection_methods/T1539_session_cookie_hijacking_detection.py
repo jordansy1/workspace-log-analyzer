@@ -44,9 +44,7 @@ def detect_google_session_cookie_hijacking(events: List[Dict[str, Any]], metadat
 
             anomalies.append({
                 'id': f'ANOM-SESSION-HIJACK-{hash(user + timestamp) % 10000:04d}',
-                'type': 'session_hijacking_confirmed',
-                'severity': 'critical',
-                'requires_deep_analysis': False,  # Google already confirmed it
+                'type': 'session_hijacking_confirmed',                'requires_deep_analysis': False,  # Google already confirmed it
                 'sub_agent': 'session_analyzer',
                 'description': f'Google detected and terminated suspicious session cookie for {user}',
                 'evidence': {

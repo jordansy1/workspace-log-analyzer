@@ -47,7 +47,7 @@ def detect_off_hours_access(events: List[Dict[str, Any]], metadata: Dict[str, An
         print(f"[WARNING] Could not load business hours config: {e}")
         print("[WARNING] Falling back to default hours: 08:00-18:00 UTC")
         business_hours_config = {
-            'primary_timezone': 'UTC',
+            'primary_timezone': 'America/New_York',
             'weekday_start': '08:00',
             'weekday_end': '18:00',
             'weekend_start': None,
@@ -116,9 +116,7 @@ def detect_off_hours_access(events: List[Dict[str, Any]], metadata: Dict[str, An
 
                     anomalies.append({
                         'id': f'ANOM-HOURS-{hash(event.get("event_id")) % 1000:03d}',
-                        'type': 'off_hours_access',
-                        'severity': 'low',
-                        'requires_deep_analysis': True,
+                        'type': 'off_hours_access',                        'requires_deep_analysis': True,
                         'sub_agent': 'behavioral_analyzer',
                         'description': description,
                         'evidence': {

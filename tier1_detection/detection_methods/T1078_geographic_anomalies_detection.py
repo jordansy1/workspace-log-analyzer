@@ -44,9 +44,7 @@ def detect_geographic_anomalies(events: List[Dict[str, Any]], metadata: Dict[str
     if len(unique_regions) > 1:
         anomalies.append({
             'id': 'ANOM-GEO-001',
-            'type': 'multiple_locations',
-            'severity': 'medium',
-            'requires_deep_analysis': True,
+            'type': 'multiple_locations',            'requires_deep_analysis': True,
             'sub_agent': 'geographic_analyzer',
             'description': f'Authentication from {len(unique_regions)} different geographic regions',
             'evidence': {

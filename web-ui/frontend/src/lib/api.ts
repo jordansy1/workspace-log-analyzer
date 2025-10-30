@@ -84,13 +84,25 @@ export interface TriageGuidance {
   likely_false_positive_if?: string[];
 }
 
+export interface Tier2Analysis {
+  agent_name: string;
+  is_actual_risk: boolean;
+  confidence: 'high' | 'medium' | 'low';
+  adjusted_severity: string;
+  forensic_narrative: string;
+  recommended_actions: string[];
+}
+
 export interface Anomaly {
   id: string;
   type: string;
   severity: string;
   description: string;
   is_actual_risk?: boolean;
-  triage_guidance?: TriageGuidance;  // NEW: Tier-1 analyst guidance
+  sub_agent?: string;  // Tier-2 agent that analyzed this anomaly
+  context_questions?: string[];  // Investigation context from tier-1
+  triage_guidance?: TriageGuidance;  // Tier-1 analyst guidance
+  tier2_analysis?: Tier2Analysis;  // NEW: Tier-2 AI agent analysis
   refined_assessment?: {
     is_actual_risk: boolean;
     likely_scenario: string;
@@ -101,7 +113,7 @@ export interface Anomaly {
     key_enriched_factors?: Record<string, any>;
   };
   evidence?: any;
-  mitre_attack?: string[];  // NEW: MITRE ATT&CK technique IDs
+  mitre_attack?: string[];  // MITRE ATT&CK technique IDs
 }
 
 export interface AnalysisData {

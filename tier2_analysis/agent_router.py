@@ -13,7 +13,8 @@ from tier2_analysis.agents import (
     CredentialStuffingAgent,
     PasswordSprayAgent,
     SessionAgent,
-    BehavioralAgent
+    BehavioralAgent,
+    OAuthTokenAgent
 )
 from config import format_context_for_agent
 
@@ -36,6 +37,7 @@ class AgentRouter:
             'password_spray_analyzer': PasswordSprayAgent(),
             'session_analyzer': SessionAgent(),
             'behavioral_analyzer': BehavioralAgent(),
+            'oauth_token_analyzer': OAuthTokenAgent(),
         }
 
         # Load business context for agents

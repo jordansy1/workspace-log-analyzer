@@ -19,6 +19,9 @@ from tier1_detection.detection_methods.M1036_off_hours_access_detection import d
 from tier1_detection.detection_methods.T1098_account_manipulation_detection import detect_account_manipulation
 from tier1_detection.detection_methods.T1078_google_suspicious_detection import detect_google_suspicious_events
 from tier1_detection.detection_methods.T1539_session_cookie_hijacking_detection import detect_google_session_cookie_hijacking
+from tier1_detection.detection_methods.T1550_001_oauth_token_abuse import detect_oauth_token_abuse
+from tier1_detection.detection_methods.T1528_steal_oauth_token import detect_stolen_oauth_token
+from tier1_detection.detection_methods.T1098_001_malicious_oauth_app import detect_malicious_oauth_app
 
 __all__ = [
     'detect_missing_mfa',
@@ -33,5 +36,8 @@ __all__ = [
     'detect_off_hours_access',
     'detect_account_manipulation',
     'detect_google_suspicious_events',
-    'detect_google_session_cookie_hijacking'
+    'detect_google_session_cookie_hijacking',
+    'detect_oauth_token_abuse',
+    'detect_stolen_oauth_token',
+    'detect_malicious_oauth_app'
 ]

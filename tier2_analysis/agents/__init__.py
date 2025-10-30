@@ -11,6 +11,7 @@ from tier2_analysis.agents.credential_stuffing_analyzer.agent import CredentialS
 from tier2_analysis.agents.password_spray_analyzer.agent import PasswordSprayAgent
 from tier2_analysis.agents.session_analyzer.agent import SessionAgent
 from tier2_analysis.agents.behavioral_analyzer.agent import BehavioralAgent
+from tier2_analysis.agents.oauth_token_agent import OAuthTokenAgent
 
 __all__ = [
     'MFAContextAgent',
@@ -19,5 +20,6 @@ __all__ = [
     'CredentialStuffingAgent',
     'PasswordSprayAgent',
     'SessionAgent',
-    'BehavioralAgent'
+    'BehavioralAgent',
+    'OAuthTokenAgent'
 ]

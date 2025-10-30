@@ -30,7 +30,18 @@ from fetch_logs import WorkspaceLogFetcher
 from orchestrator_modular import ModularAnalysisOrchestrator
 from report_aggregator import ReportAggregator
 
-load_dotenv()
+# Load .env from project root
+project_root = Path(__file__).parent.parent.parent
+env_path = project_root / '.env'
+load_dotenv(env_path)
+
+# Verify critical environment variables
+anthropic_key = os.getenv('ANTHROPIC_API_KEY')
+if anthropic_key:
+    print(f"[OK] Anthropic API key loaded (length: {len(anthropic_key)} chars)")
+else:
+    print(f"[WARNING] ANTHROPIC_API_KEY not found in environment")
+    print(f"[INFO] Checked .env file at: {env_path}")
 
 app = FastAPI(title="Workspace Log Analyzer API", version="1.0.0")
 
@@ -279,13 +290,28 @@ async def run_analysis(
         raise HTTPException(status_code=404, detail="Log file not found")
 
     try:
+        # Change to project root directory for relative path resolution
+        project_root = Path(__file__).parent.parent.parent
+        original_cwd = os.getcwd()
+        os.chdir(project_root)
+        print(f"[Backend] Changed working directory to: {project_root}")
+
         # Run orchestrator
-        analysis_dir = Path(__file__).parent.parent.parent / "analysis"
+        analysis_dir = project_root / "analysis"
+        print(f"[Backend] Starting analysis for: {request.log_file_path}")
+        print(f"[Backend] Analysis output dir: {analysis_dir}")
+
         orchestrator = ModularAnalysisOrchestrator(
             request.log_file_path,
             output_dir=str(analysis_dir)
         )
+        print(f"[Backend] Orchestrator initialized")
+
         results = orchestrator.run_analysis(enable_tier2=True)
+        print(f"[Backend] Analysis complete")
+
+        # Restore original working directory
+        os.chdir(original_cwd)
 
         # Extract analysis file path - modular orchestrator saves to reports/
         # Find the most recent report file
@@ -315,6 +341,15 @@ async def run_analysis(
         )
 
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"[Backend ERROR] Analysis failed:")
+        print(error_trace)
+        # Restore working directory even on error
+        try:
+            os.chdir(original_cwd)
+        except:
+            pass
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 
@@ -324,13 +359,69 @@ async def get_analysis_details(analysis_filename: str, token: str = Query(...)):
     get_user_session(token)  # Validate token
 
     analysis_dir = Path(__file__).parent.parent.parent / "analysis"
-    analysis_path = analysis_dir / analysis_filename
+
+    # Try reports subdirectory first (modular orchestrator saves there)
+    analysis_path = analysis_dir / "reports" / analysis_filename
+    if not analysis_path.exists():
+        # Fallback to root analysis directory
+        analysis_path = analysis_dir / analysis_filename
 
     if not analysis_path.exists():
         raise HTTPException(status_code=404, detail="Analysis file not found")
 
     with open(analysis_path, 'r') as f:
-        return json.load(f)
+        data = json.load(f)
+
+    # Transform modular orchestrator format to frontend-expected format
+    # Frontend expects: refined_anomalies (tier1 anomalies enriched with tier2 analysis)
+    # Backend provides: tier1_anomalies + tier2_analyses (separate)
+
+    if 'tier1_anomalies' in data and 'tier2_analyses' in data:
+        # Create a map of anomaly_id -> tier2_analysis
+        tier2_map = {}
+        for t2_analysis in data.get('tier2_analyses', []):
+            anomaly_id = t2_analysis.get('anomaly_id')
+            if anomaly_id:
+                tier2_map[anomaly_id] = t2_analysis
+
+        # Merge tier2 analysis into tier1 anomalies as "refined_anomalies"
+        refined_anomalies = []
+        for t1_anomaly in data.get('tier1_anomalies', []):
+            anomaly_id = t1_anomaly.get('id')
+            enriched = t1_anomaly.copy()
+
+            # Add tier2 analysis fields if available
+            if anomaly_id in tier2_map:
+                t2 = tier2_map[anomaly_id]
+                enriched['tier2_analysis'] = {
+                    'is_actual_risk': t2.get('is_actual_risk', False),
+                    'confidence': t2.get('confidence', 'unknown'),
+                    'adjusted_severity': t2.get('adjusted_severity', t1_anomaly.get('severity')),
+                    'forensic_narrative': t2.get('forensic_narrative', ''),
+                    'recommended_actions': t2.get('recommended_actions', []),
+                    'agent_name': t2.get('agent_name', 'unknown')
+                }
+                enriched['is_actual_risk'] = t2.get('is_actual_risk', False)
+                enriched['adjusted_severity'] = t2.get('adjusted_severity', t1_anomaly.get('severity'))
+
+            refined_anomalies.append(enriched)
+
+        # Replace tier1/tier2 with unified refined_anomalies
+        data['refined_anomalies'] = refined_anomalies
+
+        # Add metadata.anomaly_summary for frontend compatibility
+        summary = data.get('summary', {})
+        if 'metadata' not in data:
+            data['metadata'] = {}
+
+        data['metadata']['anomaly_summary'] = {
+            'total_initial_detections': summary.get('tier1_detections', 0),
+            'refined_anomalies': summary.get('tier2_analyses_performed', 0),
+            'actual_risks': summary.get('actual_risks_identified', 0),
+            'false_positives': summary.get('false_positives_filtered', 0)
+        }
+
+    return data
 
 
 # Health check

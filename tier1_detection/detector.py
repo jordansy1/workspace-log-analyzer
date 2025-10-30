@@ -23,7 +23,10 @@ from tier1_detection.detection_methods import (
     detect_off_hours_access,
     detect_account_manipulation,
     detect_google_suspicious_events,
-    detect_google_session_cookie_hijacking
+    detect_google_session_cookie_hijacking,
+    detect_oauth_token_abuse,
+    detect_stolen_oauth_token,
+    detect_malicious_oauth_app
 )
 
 
@@ -66,7 +69,7 @@ class AnomalyDetector:
         """
         anomalies = []
 
-        print(f"[Tier1Detector] Running {13} detection methods...")
+        print(f"[Tier1Detector] Running {16} detection methods...")
 
         # Detection 1: Check for Google session cookie hijacking (T1539) - CRITICAL
         session_cookie_anomalies = detect_google_session_cookie_hijacking(self.events, self.metadata)
@@ -145,6 +148,24 @@ class AnomalyDetector:
         if account_manipulation_anomalies:
             anomalies.extend(account_manipulation_anomalies)
             print(f"  [+] Account Manipulation: {len(account_manipulation_anomalies)} anomalies")
+
+        # Detection 14: OAuth token abuse detection (T1550.001)
+        oauth_abuse_anomalies = detect_oauth_token_abuse(self.events)
+        if oauth_abuse_anomalies:
+            anomalies.extend(oauth_abuse_anomalies)
+            print(f"  [+] OAuth Token Abuse: {len(oauth_abuse_anomalies)} anomalies")
+
+        # Detection 15: Stolen OAuth token detection (T1528)
+        stolen_token_anomalies = detect_stolen_oauth_token(self.events)
+        if stolen_token_anomalies:
+            anomalies.extend(stolen_token_anomalies)
+            print(f"  [+] Stolen OAuth Token: {len(stolen_token_anomalies)} anomalies")
+
+        # Detection 16: Malicious OAuth app detection (T1098.001)
+        malicious_oauth_anomalies = detect_malicious_oauth_app(self.events)
+        if malicious_oauth_anomalies:
+            anomalies.extend(malicious_oauth_anomalies)
+            print(f"  [+] Malicious OAuth App: {len(malicious_oauth_anomalies)} anomalies")
 
         print(f"[Tier1Detector] Complete: {len(anomalies)} total anomalies detected")
         return anomalies

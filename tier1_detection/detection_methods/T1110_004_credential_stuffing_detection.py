@@ -44,9 +44,7 @@ def detect_credential_stuffing(events: List[Dict[str, Any]], metadata: Dict[str,
         if len(unique_users) >= 3:  # Threshold: 3+ different users
             anomalies.append({
                 'id': f'ANOM-STUFF-{hash(ip) % 1000:03d}',
-                'type': 'credential_stuffing',
-                'severity': 'high',
-                'requires_deep_analysis': True,
+                'type': 'credential_stuffing',                'requires_deep_analysis': True,
                 'sub_agent': 'credential_stuffing_analyzer',
                 'description': f'Possible credential stuffing from {ip} targeting {len(unique_users)} accounts',
                 'evidence': {

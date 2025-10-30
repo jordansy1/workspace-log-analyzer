@@ -42,9 +42,7 @@ def detect_missing_mfa(events: List[Dict[str, Any]], metadata: Dict[str, Any]) -
     if not has_2fa and no_2fa_count > 0:
         return {
             'id': 'ANOM-MFA-001',
-            'type': 'missing_mfa',
-            'severity': 'high',  # Initial severity, may be adjusted
-            'requires_deep_analysis': True,
+            'type': 'missing_mfa',            'requires_deep_analysis': True,
             'sub_agent': 'mfa_context_analyzer',
             'description': 'No second factor authentication detected in login verification events',
             'evidence': {

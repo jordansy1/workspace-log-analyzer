@@ -65,9 +65,7 @@ def detect_mfa_fatigue(events: List[Dict[str, Any]], metadata: Dict[str, Any]) -
 
                     anomalies.append({
                         'id': f'ANOM-MFA-BOMB-{hash(user) % 1000:03d}',
-                        'type': 'mfa_fatigue',
-                        'severity': 'high',
-                        'requires_deep_analysis': True,
+                        'type': 'mfa_fatigue',                        'requires_deep_analysis': True,
                         'sub_agent': 'mfa_context_analyzer',
                         'description': f'Possible MFA fatigue attack on {user} ({len(burst_events)} requests in 5 minutes)',
                         'evidence': {

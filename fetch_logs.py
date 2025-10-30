@@ -150,6 +150,112 @@ class WorkspaceLogFetcher:
             print(f"[ERROR] Error fetching logs: {error}")
             raise
 
+    def fetch_saml_logs(self, hours_back=24, user_key='all', max_results=1000):
+        """
+        Fetch SAML application authentication logs.
+
+        Captures Single Sign-On (SSO) authentication events to third-party applications.
+        Useful for detecting unauthorized SAML assertions, SSO abuse, and third-party app compromise.
+
+        Args:
+            hours_back: Number of hours to look back for logs
+            user_key: User identifier ('all' for all users, or specific email)
+            max_results: Maximum number of results per page
+
+        Returns:
+            List of SAML activity events
+        """
+        if not self.service:
+            raise RuntimeError("Not authenticated. Call authenticate() first.")
+
+        start_time = datetime.utcnow() - timedelta(hours=hours_back)
+        start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
+        print(f"Fetching SAML logs from the last {hours_back} hours...")
+        print(f"Start time: {start_time_str}")
+
+        try:
+            all_activities = []
+            page_token = None
+
+            while True:
+                results = self.service.activities().list(
+                    userKey=user_key,
+                    applicationName='saml',
+                    startTime=start_time_str,
+                    maxResults=max_results,
+                    pageToken=page_token
+                ).execute()
+
+                activities = results.get('items', [])
+                all_activities.extend(activities)
+
+                page_token = results.get('nextPageToken')
+                if not page_token:
+                    break
+
+                print(f"  Retrieved {len(all_activities)} SAML events so far...")
+
+            print(f"[OK] Successfully fetched {len(all_activities)} SAML events")
+            return all_activities
+
+        except HttpError as error:
+            print(f"[ERROR] Error fetching SAML logs: {error}")
+            raise
+
+    def fetch_token_logs(self, hours_back=24, user_key='all', max_results=1000):
+        """
+        Fetch OAuth token and API access logs.
+
+        Captures OAuth token grants, revocations, and API access events.
+        Useful for detecting malicious OAuth applications, token theft, and API abuse.
+
+        Args:
+            hours_back: Number of hours to look back for logs
+            user_key: User identifier ('all' for all users, or specific email)
+            max_results: Maximum number of results per page
+
+        Returns:
+            List of token/OAuth activity events
+        """
+        if not self.service:
+            raise RuntimeError("Not authenticated. Call authenticate() first.")
+
+        start_time = datetime.utcnow() - timedelta(hours=hours_back)
+        start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
+        print(f"Fetching OAuth/token logs from the last {hours_back} hours...")
+        print(f"Start time: {start_time_str}")
+
+        try:
+            all_activities = []
+            page_token = None
+
+            while True:
+                results = self.service.activities().list(
+                    userKey=user_key,
+                    applicationName='token',
+                    startTime=start_time_str,
+                    maxResults=max_results,
+                    pageToken=page_token
+                ).execute()
+
+                activities = results.get('items', [])
+                all_activities.extend(activities)
+
+                page_token = results.get('nextPageToken')
+                if not page_token:
+                    break
+
+                print(f"  Retrieved {len(all_activities)} token events so far...")
+
+            print(f"[OK] Successfully fetched {len(all_activities)} token events")
+            return all_activities
+
+        except HttpError as error:
+            print(f"[ERROR] Error fetching token logs: {error}")
+            raise
+
     def process_logs(self, raw_logs):
         """
         Process raw logs into a structured format for analysis.

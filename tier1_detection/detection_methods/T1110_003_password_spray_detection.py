@@ -61,9 +61,7 @@ def detect_password_spray(events: List[Dict[str, Any]], metadata: Dict[str, Any]
             if event_type == 'login_failure' and len(users) >= 5:
                 anomalies.append({
                     'id': f'ANOM-SPRAY-{window % 1000:03d}',
-                    'type': 'password_spray',
-                    'severity': 'critical',
-                    'requires_deep_analysis': True,
+                    'type': 'password_spray',                    'requires_deep_analysis': True,
                     'sub_agent': 'password_spray_analyzer',
                     'description': f'Password spray detected from {ip} targeting {len(users)} accounts',
                     'evidence': {

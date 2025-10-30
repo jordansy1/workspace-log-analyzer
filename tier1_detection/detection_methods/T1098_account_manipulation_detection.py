@@ -63,9 +63,7 @@ def detect_account_manipulation(events: List[Dict[str, Any]], metadata: Dict[str
                 if (t_last - t1).total_seconds() < 3600:
                     anomalies.append({
                         'id': f'ANOM-ACCT-{hash(user) % 1000:03d}',
-                        'type': 'account_manipulation',
-                        'severity': 'high',
-                        'requires_deep_analysis': True,
+                        'type': 'account_manipulation',                        'requires_deep_analysis': True,
                         'sub_agent': 'account_analyzer',
                         'description': f'Rapid password changes detected for {user} (possible policy bypass)',
                         'evidence': {

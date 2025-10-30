@@ -53,9 +53,7 @@ def detect_rapid_access(events: List[Dict[str, Any]], metadata: Dict[str, Any]) 
 
                 anomalies.append({
                     'id': f'ANOM-RAPID-{i:03d}',
-                    'type': 'rapid_retry',
-                    'severity': 'low',
-                    'requires_deep_analysis': True,
+                    'type': 'rapid_retry',                    'requires_deep_analysis': True,
                     'sub_agent': 'failed_login_analyzer',
                     'description': f'Rapid retry ({diff_seconds:.0f}s) after failed login',
                     'evidence': {

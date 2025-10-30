@@ -109,6 +109,11 @@ export default function DashboardPage() {
         evidence.failed_events.forEach(addEventToMap);
       }
 
+      if (evidence?.events) {
+        // Session anomalies (concurrent sessions, impossible travel) have events array
+        evidence.events.forEach(addEventToMap);
+      }
+
       if (evidence?.failure_event) {
         // Rapid retry anomalies have failure_event and success_event
         addEventToMap(evidence.failure_event);

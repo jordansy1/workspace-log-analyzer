@@ -173,8 +173,25 @@ class BaseAgent(ABC):
             'is_actual_risk': False,
             'confidence': 'medium',
             'adjusted_severity': 'low',
-            'forensic_narrative': f'Mock analysis from {self.name} (API unavailable)',
-            'recommended_actions': ['Review manually', 'Enable API for full analysis'],
+            'forensic_narrative': (
+                f'⚠️ LIMITED ANALYSIS: This is a mock response from {self.name} because the Anthropic Claude API is not configured.\n\n'
+                'To enable full AI-powered forensic analysis:\n'
+                '1. Obtain an API key from console.anthropic.com/settings/keys\n'
+                '2. Set the ANTHROPIC_API_KEY environment variable in your system or .env file\n'
+                '3. Restart the backend server\n\n'
+                'Full analysis provides:\n'
+                '• Detailed forensic reasoning based on contextual enrichment data\n'
+                '• High-confidence risk assessments using behavioral baselines\n'
+                '• Specific, actionable recommendations tailored to this event\n'
+                '• Detection of subtle attack patterns that rule-based systems miss\n\n'
+                'Current assessment: Based on tier-1 detection alone, manual review recommended.'
+            ),
+            'recommended_actions': [
+                'Configure Anthropic Claude API for full AI analysis (see forensic narrative above)',
+                'Manually review this event using the enrichment data provided',
+                'Cross-reference with other security tools (SIEM, EDR) for additional context',
+                'If user reports issues, investigate immediately regardless of automated assessment'
+            ],
             'mock_response': True
         }
 

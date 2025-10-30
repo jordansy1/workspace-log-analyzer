@@ -47,6 +47,34 @@ export default function EventsTable({ events, onEventClick }: EventsTableProps) 
         size: 40,
       },
       {
+        id: 'severity',
+        header: 'Severity',
+        accessorFn: (row) => row,
+        cell: ({ getValue }) => {
+          const row = getValue() as LogEvent & { hasAnomaly?: boolean; anomaly?: any };
+          if (!row.hasAnomaly || !row.anomaly?.tier2_analysis?.adjusted_severity) return null;
+
+          const severity = row.anomaly.tier2_analysis.adjusted_severity.toLowerCase();
+          const colors = {
+            critical: 'bg-red-600 text-white border-red-700',
+            high: 'bg-orange-500 text-white border-orange-600',
+            medium: 'bg-yellow-500 text-white border-yellow-600',
+            low: 'bg-blue-500 text-white border-blue-600',
+          };
+
+          return (
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-semibold border ${
+                colors[severity as keyof typeof colors] || 'bg-gray-500 text-white'
+              }`}
+            >
+              {severity.toUpperCase()}
+            </span>
+          );
+        },
+        size: 100,
+      },
+      {
         accessorKey: 'timestamp',
         header: 'Timestamp',
         cell: ({ getValue }) => {
@@ -90,24 +118,6 @@ export default function EventsTable({ events, onEventClick }: EventsTableProps) 
             </span>
           );
         },
-      },
-      {
-        id: 'google_flag',
-        header: 'Google',
-        accessorKey: 'is_suspicious',
-        cell: ({ getValue }) => {
-          const isSuspicious = getValue() as boolean;
-          if (isSuspicious) {
-            return (
-              <Flag
-                className="w-4 h-4 text-orange-600"
-                title="Flagged as suspicious by Google Workspace"
-              />
-            );
-          }
-          return null;
-        },
-        size: 60,
       },
       {
         accessorKey: 'user_email',
