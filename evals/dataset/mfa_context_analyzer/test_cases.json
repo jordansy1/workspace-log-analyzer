@@ -1,0 +1,695 @@
+{
+  "eval_cases": [
+    {
+      "case_id": "MFA_001_trusted_device_home",
+      "description": "Legitimate user on trusted device from home location with 2FA enrolled",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-001",
+        "type": "missing_mfa",
+        "severity": "high",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1556.006"],
+        "affected_users": ["alice@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T10:15:00Z",
+              "is_second_factor": false,
+              "login_type": "reauth"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": []
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "alice@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true,
+          "organizational_unit": "/Engineering"
+        },
+        "ip_reputation": {
+          "ip": "99.209.227.194",
+          "risk_score": 5,
+          "is_malicious": false,
+          "abuse_confidence": 0
+        },
+        "geolocation": {
+          "city": "Seattle",
+          "region": "Washington",
+          "country": "US",
+          "isp": "Comcast Cable",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["99.209.227.194", "99.209.227.195"],
+          "typical_locations": ["Seattle, US"],
+          "deviations": []
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": false,
+        "expected_severity": "low",
+        "expected_scenario": "trusted_device",
+        "confidence_threshold": "high",
+        "rationale": "User has 2FA enrolled, IP reputation is clean (score 5), location matches known baseline, no deviations. This is standard Google Workspace trusted device behavior."
+      },
+      "metadata": {
+        "difficulty": "easy",
+        "source": "synthetic",
+        "tags": ["mfa", "trusted_device", "baseline_match", "low_risk"]
+      }
+    },
+    {
+      "case_id": "MFA_002_session_cookie_theft",
+      "description": "Stolen session cookie attack - user has 2FA but attacker using high-risk IP from Tor",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-002",
+        "type": "missing_mfa",
+        "severity": "high",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1539", "T1556.006"],
+        "affected_users": ["bob@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T14:22:00Z",
+              "is_second_factor": false,
+              "login_type": "exchange"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": ["new_ip_address", "new_geographic_region", "tor_exit_node_detected"]
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "bob@company.com",
+          "is_admin": true,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true,
+          "organizational_unit": "/Administrators"
+        },
+        "ip_reputation": {
+          "ip": "185.220.101.45",
+          "risk_score": 95,
+          "is_malicious": true,
+          "abuse_confidence": 87,
+          "threat_types": ["tor_exit_node", "suspicious_activity"]
+        },
+        "geolocation": {
+          "city": "Unknown",
+          "region": "Unknown",
+          "country": "NL",
+          "isp": "Tor Exit Node",
+          "is_tor": true,
+          "is_vpn": false,
+          "is_proxy": true,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["104.56.78.90"],
+          "typical_locations": ["San Francisco, US"],
+          "deviations": ["new_ip_address", "new_geographic_region", "tor_exit_node_detected"]
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": true,
+        "expected_severity": "critical",
+        "expected_scenario": "session_cookie_theft",
+        "confidence_threshold": "high",
+        "rationale": "User has 2FA enrolled BUT accessing from Tor exit node with high risk score (95), completely new geographic region. This indicates stolen session cookie allowing MFA bypass. Admin account makes this critical."
+      },
+      "metadata": {
+        "difficulty": "easy",
+        "source": "synthetic",
+        "tags": ["mfa", "session_theft", "tor", "high_risk", "admin_account"]
+      }
+    },
+    {
+      "case_id": "MFA_003_policy_violation_non_admin",
+      "description": "Regular user without 2FA enrolled but policy not enforced",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-003",
+        "type": "missing_mfa",
+        "severity": "medium",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1556.006"],
+        "affected_users": ["charlie@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T09:30:00Z",
+              "is_second_factor": false,
+              "login_type": "login"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": []
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "charlie@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": false,
+          "is_2fa_enforced": false,
+          "organizational_unit": "/Sales"
+        },
+        "ip_reputation": {
+          "ip": "73.162.45.12",
+          "risk_score": 10,
+          "is_malicious": false,
+          "abuse_confidence": 0
+        },
+        "geolocation": {
+          "city": "Austin",
+          "region": "Texas",
+          "country": "US",
+          "isp": "AT&T Internet Services",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["73.162.45.12", "73.162.45.11"],
+          "typical_locations": ["Austin, US"],
+          "deviations": []
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": false,
+        "expected_severity": "medium",
+        "expected_scenario": "policy_violation",
+        "confidence_threshold": "high",
+        "rationale": "User does NOT have 2FA enrolled and enforcement is disabled. This is a policy gap but not an active attack. Legitimate access from known location but security posture is weak."
+      },
+      "metadata": {
+        "difficulty": "medium",
+        "source": "synthetic",
+        "tags": ["mfa", "policy_gap", "not_enrolled", "legitimate_access"]
+      }
+    },
+    {
+      "case_id": "MFA_004_vpn_legitimate_travel",
+      "description": "User traveling using corporate VPN - new location but expected",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-004",
+        "type": "missing_mfa",
+        "severity": "high",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1556.006"],
+        "affected_users": ["diana@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T16:45:00Z",
+              "is_second_factor": false,
+              "login_type": "reauth"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": ["new_geographic_region"]
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "diana@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true,
+          "organizational_unit": "/Sales"
+        },
+        "ip_reputation": {
+          "ip": "52.13.45.78",
+          "risk_score": 20,
+          "is_malicious": false,
+          "abuse_confidence": 0
+        },
+        "geolocation": {
+          "city": "London",
+          "region": "England",
+          "country": "GB",
+          "isp": "NordVPN",
+          "is_tor": false,
+          "is_vpn": true,
+          "is_proxy": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["104.25.123.45"],
+          "typical_locations": ["Boston, US"],
+          "deviations": ["new_geographic_region"]
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": false,
+        "expected_severity": "low",
+        "expected_scenario": "legitimate_travel",
+        "confidence_threshold": "medium",
+        "rationale": "User has 2FA enrolled, using commercial VPN service (common for business travel). IP reputation is low-risk (20). New geographic region but VPN usage for international travel is normal corporate behavior. Reauth type suggests continuing session."
+      },
+      "metadata": {
+        "difficulty": "medium",
+        "source": "synthetic",
+        "tags": ["mfa", "vpn", "travel", "new_location", "legitimate"]
+      }
+    },
+    {
+      "case_id": "MFA_005_credential_stuffing_hosting",
+      "description": "Attack from cloud hosting provider with medium risk score",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-005",
+        "type": "missing_mfa",
+        "severity": "high",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1110.004", "T1556.006"],
+        "affected_users": ["eve@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T03:15:00Z",
+              "is_second_factor": false,
+              "login_type": "login"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": ["new_ip_address", "new_geographic_region", "hosting_provider_detected"]
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "eve@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true,
+          "organizational_unit": "/Engineering"
+        },
+        "ip_reputation": {
+          "ip": "159.89.123.45",
+          "risk_score": 65,
+          "is_malicious": false,
+          "abuse_confidence": 45,
+          "threat_types": ["automated_attacks", "credential_stuffing"]
+        },
+        "geolocation": {
+          "city": "Frankfurt",
+          "region": "Hesse",
+          "country": "DE",
+          "isp": "DigitalOcean LLC",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": true
+        },
+        "baseline": {
+          "typical_ips": ["192.168.1.100"],
+          "typical_locations": ["Portland, US"],
+          "deviations": ["new_ip_address", "new_geographic_region", "hosting_provider_detected"]
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": true,
+        "expected_severity": "high",
+        "expected_scenario": "mfa_bypass_attack",
+        "confidence_threshold": "high",
+        "rationale": "User has 2FA enrolled but accessing from cloud hosting provider (DigitalOcean) typically used for automated attacks. Risk score of 65 with credential stuffing history. New IP and geographic region. Login at 3:15 AM is suspicious timing. Likely MFA bypass tool or stolen credentials."
+      },
+      "metadata": {
+        "difficulty": "medium",
+        "source": "synthetic",
+        "tags": ["mfa", "hosting_provider", "credential_stuffing", "suspicious_timing"]
+      }
+    },
+    {
+      "case_id": "MFA_006_admin_no_mfa_enforced",
+      "description": "Critical: Admin account without 2FA enforcement - high severity policy violation",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-006",
+        "type": "missing_mfa",
+        "severity": "high",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1556.006"],
+        "affected_users": ["admin@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T11:00:00Z",
+              "is_second_factor": false,
+              "login_type": "login"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": []
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "admin@company.com",
+          "is_admin": true,
+          "is_2fa_enrolled": false,
+          "is_2fa_enforced": false,
+          "organizational_unit": "/Administrators"
+        },
+        "ip_reputation": {
+          "ip": "203.45.67.89",
+          "risk_score": 15,
+          "is_malicious": false,
+          "abuse_confidence": 0
+        },
+        "geolocation": {
+          "city": "New York",
+          "region": "New York",
+          "country": "US",
+          "isp": "Verizon Fios",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["203.45.67.89"],
+          "typical_locations": ["New York, US"],
+          "deviations": []
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": true,
+        "expected_severity": "high",
+        "expected_scenario": "policy_violation",
+        "confidence_threshold": "high",
+        "rationale": "Admin account without 2FA enrolled and not enforced is a critical security gap. While the current login appears legitimate (clean IP, known location), the lack of MFA on privileged account creates high risk. Should be flagged for immediate remediation even though this specific login isn't malicious."
+      },
+      "metadata": {
+        "difficulty": "hard",
+        "source": "synthetic",
+        "tags": ["mfa", "admin_account", "policy_violation", "no_enrollment", "critical_gap"]
+      }
+    },
+    {
+      "case_id": "MFA_007_ambiguous_moderate_risk",
+      "description": "Edge case: Moderate risk IP, new location, but residential ISP with 2FA enrolled",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-007",
+        "type": "missing_mfa",
+        "severity": "high",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1556.006"],
+        "affected_users": ["frank@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T13:30:00Z",
+              "is_second_factor": false,
+              "login_type": "reauth"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": ["new_ip_address", "new_geographic_region"]
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "frank@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true,
+          "organizational_unit": "/Marketing"
+        },
+        "ip_reputation": {
+          "ip": "45.123.78.90",
+          "risk_score": 45,
+          "is_malicious": false,
+          "abuse_confidence": 30,
+          "threat_types": ["spam"]
+        },
+        "geolocation": {
+          "city": "Miami",
+          "region": "Florida",
+          "country": "US",
+          "isp": "Cox Communications",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["98.234.56.78"],
+          "typical_locations": ["Chicago, US"],
+          "deviations": ["new_ip_address", "new_geographic_region"]
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": false,
+        "expected_severity": "medium",
+        "expected_scenario": "trusted_device",
+        "confidence_threshold": "medium",
+        "rationale": "Ambiguous case. User has 2FA enrolled. Risk score of 45 is moderate (spam history but not malicious). New location (Miami vs Chicago) could be relocation or travel. Residential ISP (Cox) suggests legitimate user. Reauth type indicates continuing session. Likely legitimate but warrants monitoring given moderate risk score."
+      },
+      "metadata": {
+        "difficulty": "hard",
+        "source": "synthetic",
+        "tags": ["mfa", "ambiguous", "moderate_risk", "new_location", "edge_case"]
+      }
+    },
+    {
+      "case_id": "MFA_008_oauth_flow_no_second_factor",
+      "description": "OAuth/SAML authentication flow where is_second_factor not visible",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-008",
+        "type": "missing_mfa",
+        "severity": "high",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1556.006"],
+        "affected_users": ["grace@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T08:00:00Z",
+              "is_second_factor": false,
+              "login_type": "exchange"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": []
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "grace@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true,
+          "organizational_unit": "/Engineering"
+        },
+        "ip_reputation": {
+          "ip": "12.34.56.78",
+          "risk_score": 0,
+          "is_malicious": false,
+          "abuse_confidence": 0
+        },
+        "geolocation": {
+          "city": "San Jose",
+          "region": "California",
+          "country": "US",
+          "isp": "Google LLC",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["12.34.56.78", "12.34.56.79"],
+          "typical_locations": ["San Jose, US"],
+          "deviations": []
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": false,
+        "expected_severity": "low",
+        "expected_scenario": "oauth_flow",
+        "confidence_threshold": "high",
+        "rationale": "OAuth/SAML token exchange flow often doesn't show is_second_factor in logs. User has 2FA enrolled and enforced. IP from Google infrastructure (corporate apps). Zero risk score, matches baseline perfectly. This is legitimate OAuth authentication where MFA was completed in prior step not visible in these logs."
+      },
+      "metadata": {
+        "difficulty": "medium",
+        "source": "synthetic",
+        "tags": ["mfa", "oauth", "saml", "exchange_flow", "legitimate"]
+      }
+    },
+    {
+      "case_id": "MFA_009_impossible_travel",
+      "description": "Session cookie theft indicated by impossible travel timing",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-009",
+        "type": "missing_mfa",
+        "severity": "high",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1539", "T1556.006"],
+        "affected_users": ["henry@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T10:00:00Z",
+              "is_second_factor": false,
+              "login_type": "login",
+              "location": "Tokyo, Japan"
+            },
+            {
+              "time": "2025-01-13T10:15:00Z",
+              "is_second_factor": false,
+              "login_type": "reauth",
+              "location": "New York, US"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": ["multiple_geographic_regions", "impossible_travel_detected"]
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "henry@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true,
+          "organizational_unit": "/Finance"
+        },
+        "ip_reputation": {
+          "ip": "13.56.78.90",
+          "risk_score": 55,
+          "is_malicious": false,
+          "abuse_confidence": 35
+        },
+        "geolocation": {
+          "city": "New York",
+          "region": "New York",
+          "country": "US",
+          "isp": "AWS",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": true
+        },
+        "baseline": {
+          "typical_ips": ["203.45.67.12"],
+          "typical_locations": ["Boston, US"],
+          "deviations": ["multiple_geographic_regions", "impossible_travel_detected", "hosting_provider_detected"]
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": true,
+        "expected_severity": "critical",
+        "expected_scenario": "session_cookie_theft",
+        "confidence_threshold": "high",
+        "rationale": "Impossible travel: Tokyo to New York in 15 minutes. User has 2FA but accessing from AWS hosting (suspicious). Risk score 55 indicates prior malicious activity. Finance user makes this high-value target. Clear indication of session cookie theft or account compromise."
+      },
+      "metadata": {
+        "difficulty": "easy",
+        "source": "synthetic",
+        "tags": ["mfa", "impossible_travel", "session_theft", "multiple_locations", "critical"]
+      }
+    },
+    {
+      "case_id": "MFA_010_mobile_device_reauth",
+      "description": "Legitimate mobile device re-authentication during commute",
+      "anomaly": {
+        "id": "ANOM-MFA-TEST-010",
+        "type": "missing_mfa",
+        "severity": "high",
+        "description": "No second factor detected in login verification events",
+        "sub_agent": "mfa_context_analyzer",
+        "mitre_attack": ["T1556.006"],
+        "affected_users": ["iris@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "login_verification_events": [
+            {
+              "time": "2025-01-13T07:45:00Z",
+              "is_second_factor": false,
+              "login_type": "reauth",
+              "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)"
+            }
+          ],
+          "baseline_comparison": {
+            "deviations": ["minor_location_change"]
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "iris@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true,
+          "organizational_unit": "/HR"
+        },
+        "ip_reputation": {
+          "ip": "172.58.123.45",
+          "risk_score": 8,
+          "is_malicious": false,
+          "abuse_confidence": 0
+        },
+        "geolocation": {
+          "city": "Oakland",
+          "region": "California",
+          "country": "US",
+          "isp": "T-Mobile USA",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["172.58.123.44", "172.58.123.46"],
+          "typical_locations": ["Oakland, US", "San Francisco, US"],
+          "deviations": ["minor_location_change"]
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": false,
+        "expected_severity": "low",
+        "expected_scenario": "trusted_device",
+        "confidence_threshold": "high",
+        "rationale": "User has 2FA enrolled. Mobile device (iPhone) re-authentication during commute (7:45 AM). T-Mobile cellular network with low risk score. Minor location change (Oakland/SF area) is normal for mobile user. Reauth type indicates session continuation. Completely benign."
+      },
+      "metadata": {
+        "difficulty": "easy",
+        "source": "synthetic",
+        "tags": ["mfa", "mobile_device", "cellular", "reauth", "commute", "legitimate"]
+      }
+    }
+  ]
+}
