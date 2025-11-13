@@ -1,0 +1,66 @@
+{
+  "eval_cases": [
+    {
+      "case_id": "AGENT_001_descriptive_name",
+      "description": "Brief description of what this test case validates",
+      "anomaly": {
+        "id": "ANOM-TEST-001",
+        "type": "anomaly_type",
+        "severity": "high",
+        "description": "Description of the anomaly",
+        "sub_agent": "agent_name_here",
+        "mitre_attack": ["T1234.567"],
+        "affected_users": ["user@company.com"],
+        "requires_deep_analysis": true,
+        "evidence": {
+          "relevant_events": [],
+          "baseline_comparison": {
+            "deviations": []
+          }
+        }
+      },
+      "enriched_context": {
+        "user_context": {
+          "email": "user@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true,
+          "organizational_unit": "/Department"
+        },
+        "ip_reputation": {
+          "ip": "1.2.3.4",
+          "risk_score": 0,
+          "is_malicious": false,
+          "abuse_confidence": 0
+        },
+        "geolocation": {
+          "city": "City",
+          "region": "State",
+          "country": "US",
+          "isp": "ISP Name",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["1.2.3.4"],
+          "typical_locations": ["City, US"],
+          "deviations": []
+        }
+      },
+      "ground_truth": {
+        "is_actual_risk": false,
+        "expected_severity": "low",
+        "expected_scenario": "scenario_name",
+        "confidence_threshold": "high",
+        "rationale": "Explain why this is/isn't a risk and what the agent should determine"
+      },
+      "metadata": {
+        "difficulty": "easy|medium|hard",
+        "source": "real_event|synthetic|red_team",
+        "tags": ["tag1", "tag2"]
+      }
+    }
+  ]
+}
