@@ -19,9 +19,14 @@ Usage:
 import argparse
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file from project root
+project_root = Path(__file__).parent.parent.parent
+load_dotenv(project_root / '.env')
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(project_root))
 
 from evals.framework.evaluator import Tier2AgentEvaluator
 
@@ -98,6 +103,16 @@ def run_single_agent(
             # Standard eval run
             results = evaluator.run_eval()
 
+            # Check if evaluation failed due to configuration
+            if results.get('status') == 'failed':
+                if results.get('error') == 'API_NOT_CONFIGURED':
+                    print(f"\n[FAILED] API configuration required")
+                    print(f"Attempted {results.get('cases_attempted', 0)} of {results.get('total_cases', 0)} cases")
+                    return False
+                else:
+                    print(f"\n[FAILED] {results.get('error_message', 'Unknown error')}")
+                    return False
+
             # Save results
             if save:
                 evaluator.save_results(results, run_name=run_name)
@@ -105,11 +120,11 @@ def run_single_agent(
             # Check pass threshold
             accuracy = results['aggregated_metrics']['core_metrics']['accuracy']
             if accuracy < 0.85:
-                print(f"\n⚠️  Warning: Accuracy ({accuracy:.1%}) below recommended threshold (85%)")
+                print(f"\n[WARNING] Accuracy ({accuracy:.1%}) below recommended threshold (85%)")
                 print("Consider reviewing failed cases and improving prompts.")
                 return False
 
-        print("\n✅ Evaluation complete!")
+        print("\n[SUCCESS] Evaluation complete!")
         return True
 
     except FileNotFoundError as e:

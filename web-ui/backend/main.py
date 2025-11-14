@@ -340,6 +340,33 @@ async def run_analysis(
             }
         )
 
+    except RuntimeError as e:
+        # Handle API configuration errors specifically
+        error_msg = str(e)
+        # Restore working directory
+        try:
+            os.chdir(original_cwd)
+        except:
+            pass
+
+        if "API is not configured" in error_msg:
+            print(f"[Backend ERROR] Anthropic API not configured")
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "API_NOT_CONFIGURED",
+                    "message": "Anthropic API is not configured. Tier-2 analysis cannot be performed.",
+                    "instructions": [
+                        "1. Obtain an API key from https://console.anthropic.com/settings/keys",
+                        "2. Set the ANTHROPIC_API_KEY environment variable in your .env file",
+                        "3. Restart the backend server"
+                    ]
+                }
+            )
+        else:
+            print(f"[Backend ERROR] Runtime error: {error_msg}")
+            raise HTTPException(status_code=500, detail=f"Runtime error: {error_msg}")
+
     except Exception as e:
         import traceback
         error_trace = traceback.format_exc()

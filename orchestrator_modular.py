@@ -132,6 +132,22 @@ class ModularAnalysisOrchestrator:
                 severity = analysis.get('adjusted_severity', 'unknown').upper()
                 print(f"  {risk_status} | {anomaly['id']} | {severity}")
 
+            except RuntimeError as e:
+                # Handle API configuration errors
+                error_msg = str(e)
+                if "API is not configured" in error_msg:
+                    print("\n" + "=" * 70)
+                    print("TIER-2 ANALYSIS HALTED: API Configuration Required")
+                    print("=" * 70)
+                    print(f"\n{error_msg}")
+                    print("\nTier-1 anomalies have been detected and saved.")
+                    print("Configure the API to enable tier-2 forensic analysis.")
+                    print("=" * 70 + "\n")
+                    break  # Stop processing further anomalies
+                else:
+                    print(f"  [!] ERROR | {anomaly.get('id')} | Runtime error: {e}")
+                    # Continue with other anomalies for non-API errors
+
             except Exception as e:
                 print(f"  [!] ERROR | {anomaly.get('id')} | Analysis failed: {e}")
                 # Continue with other anomalies even if one fails

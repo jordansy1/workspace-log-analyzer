@@ -164,18 +164,60 @@ class Tier2AgentEvaluator:
 
                 # Print summary
                 if verbose:
-                    status = "✓ PASS" if scores['passed'] else "✗ FAIL"
+                    status = "[PASS]" if scores['passed'] else "[FAIL]"
                     print(f"  {status} | Risk: {prediction.get('is_actual_risk')} (expected: {case['ground_truth']['is_actual_risk']}) | Severity: {prediction.get('adjusted_severity')}")
 
-            except Exception as e:
+            except RuntimeError as e:
+                # Handle API configuration errors specifically
+                error_msg = str(e)
+
                 if verbose:
-                    print(f"  ✗ ERROR | {str(e)}")
+                    print(f"  [CONFIGURATION ERROR]")
+                    print(f"     {error_msg}")
+
+                # Check if this is an API key error (first case only)
+                if idx == 1 and "API is not configured" in error_msg:
+                    # Stop evaluation and provide clear guidance
+                    print("\n" + "=" * 70)
+                    print("EVALUATION HALTED: API Configuration Required")
+                    print("=" * 70)
+                    print("\n" + error_msg)
+                    print("\nPlease configure the API and re-run the evaluation.")
+                    print("=" * 70 + "\n")
+
+                    # Return early with error state
+                    return {
+                        'agent_name': self.agent_name,
+                        'timestamp': datetime.now().isoformat(),
+                        'test_cases_file': self.test_cases_path,
+                        'status': 'failed',
+                        'error': 'API_NOT_CONFIGURED',
+                        'error_message': error_msg,
+                        'cases_attempted': idx,
+                        'total_cases': len(cases_to_run)
+                    }
+
+                # Record error for this specific case
+                case_results.append({
+                    'case_id': case_id,
+                    'passed': False,
+                    'error': error_msg,
+                    'error_type': 'runtime_error',
+                    'ground_truth': case['ground_truth'],
+                    'metadata': case.get('metadata', {})
+                })
+
+            except Exception as e:
+                # Handle other unexpected errors
+                if verbose:
+                    print(f"  [ERROR] | {str(e)}")
 
                 # Record error
                 case_results.append({
                     'case_id': case_id,
                     'passed': False,
                     'error': str(e),
+                    'error_type': 'unexpected_error',
                     'ground_truth': case['ground_truth'],
                     'metadata': case.get('metadata', {})
                 })
@@ -207,11 +249,16 @@ class Tier2AgentEvaluator:
         print("EVALUATION SUMMARY")
         print("=" * 70)
 
-        metrics = results['aggregated_metrics']
-
         print(f"\nAgent: {results['agent_name']}")
         print(f"Total Cases: {results['total_cases']}")
         print(f"Passed: {results['passed_cases']} | Failed: {results['failed_cases']}")
+
+        # Check if we have metrics (won't exist if all cases failed with errors)
+        if 'aggregated_metrics' not in results or not results['aggregated_metrics']:
+            print("\n[WARNING] No metrics available - all cases encountered errors")
+            return
+
+        metrics = results['aggregated_metrics']
 
         print("\n--- Core Metrics ---")
         core = metrics['core_metrics']

@@ -1,0 +1,252 @@
+[
+  {
+    "case_id": "MFA_002_session_cookie_theft",
+    "passed": false,
+    "scores": {
+      "risk_correct": false,
+      "prediction_type": "false_negative",
+      "severity_error": 3,
+      "severity_correct": false,
+      "severity_close": false,
+      "confidence": "medium",
+      "overconfidence_penalty": 0.5,
+      "scenario_correct": false,
+      "has_reasoning": true,
+      "reasoning_length": 701,
+      "evidence_citations": 1,
+      "has_recommendations": true,
+      "recommendation_count": 4,
+      "actionable_recommendations": 1,
+      "passed": false,
+      "high_quality": false,
+      "case_difficulty": "easy",
+      "case_tags": [
+        "mfa",
+        "session_theft",
+        "tor",
+        "high_risk",
+        "admin_account"
+      ]
+    },
+    "prediction": {
+      "is_actual_risk": false,
+      "confidence": "medium",
+      "adjusted_severity": "low",
+      "forensic_narrative": "\u26a0\ufe0f LIMITED ANALYSIS: This is a mock response from mfa_context_analyzer because the Anthropic Claude API is not configured.\n\nTo enable full AI-powered forensic analysis:\n1. Obtain an API key from console.anthropic.com/settings/keys\n2. Set the ANTHROPIC_API_KEY environment variable in your system or .env file\n3. Restart the backend server\n\nFull analysis provides:\n\u2022 Detailed forensic reasoning based on contextual enrichment data\n\u2022 High-confidence risk assessments using behavioral baselines\n\u2022 Specific, actionable recommendations tailored to this event\n\u2022 Detection of subtle attack patterns that rule-based systems miss\n\nCurrent assessment: Based on tier-1 detection alone, manual review recommended.",
+      "recommended_actions": [
+        "Configure Anthropic Claude API for full AI analysis (see forensic narrative above)",
+        "Manually review this event using the enrichment data provided",
+        "Cross-reference with other security tools (SIEM, EDR) for additional context",
+        "If user reports issues, investigate immediately regardless of automated assessment"
+      ],
+      "mock_response": true,
+      "anomaly_id": "ANOM-MFA-TEST-002",
+      "agent_name": "mfa_context_analyzer"
+    },
+    "ground_truth": {
+      "is_actual_risk": true,
+      "expected_severity": "critical",
+      "expected_scenario": "session_cookie_theft",
+      "confidence_threshold": "high",
+      "rationale": "User has 2FA enrolled BUT accessing from Tor exit node with high risk score (95), completely new geographic region. This indicates stolen session cookie allowing MFA bypass. Admin account makes this critical."
+    },
+    "metadata": {
+      "difficulty": "easy",
+      "source": "synthetic",
+      "tags": [
+        "mfa",
+        "session_theft",
+        "tor",
+        "high_risk",
+        "admin_account"
+      ]
+    }
+  },
+  {
+    "case_id": "MFA_005_credential_stuffing_hosting",
+    "passed": false,
+    "scores": {
+      "risk_correct": false,
+      "prediction_type": "false_negative",
+      "severity_error": 2,
+      "severity_correct": false,
+      "severity_close": false,
+      "confidence": "medium",
+      "overconfidence_penalty": 0.5,
+      "scenario_correct": false,
+      "has_reasoning": true,
+      "reasoning_length": 701,
+      "evidence_citations": 1,
+      "has_recommendations": true,
+      "recommendation_count": 4,
+      "actionable_recommendations": 1,
+      "passed": false,
+      "high_quality": false,
+      "case_difficulty": "medium",
+      "case_tags": [
+        "mfa",
+        "hosting_provider",
+        "credential_stuffing",
+        "suspicious_timing"
+      ]
+    },
+    "prediction": {
+      "is_actual_risk": false,
+      "confidence": "medium",
+      "adjusted_severity": "low",
+      "forensic_narrative": "\u26a0\ufe0f LIMITED ANALYSIS: This is a mock response from mfa_context_analyzer because the Anthropic Claude API is not configured.\n\nTo enable full AI-powered forensic analysis:\n1. Obtain an API key from console.anthropic.com/settings/keys\n2. Set the ANTHROPIC_API_KEY environment variable in your system or .env file\n3. Restart the backend server\n\nFull analysis provides:\n\u2022 Detailed forensic reasoning based on contextual enrichment data\n\u2022 High-confidence risk assessments using behavioral baselines\n\u2022 Specific, actionable recommendations tailored to this event\n\u2022 Detection of subtle attack patterns that rule-based systems miss\n\nCurrent assessment: Based on tier-1 detection alone, manual review recommended.",
+      "recommended_actions": [
+        "Configure Anthropic Claude API for full AI analysis (see forensic narrative above)",
+        "Manually review this event using the enrichment data provided",
+        "Cross-reference with other security tools (SIEM, EDR) for additional context",
+        "If user reports issues, investigate immediately regardless of automated assessment"
+      ],
+      "mock_response": true,
+      "anomaly_id": "ANOM-MFA-TEST-005",
+      "agent_name": "mfa_context_analyzer"
+    },
+    "ground_truth": {
+      "is_actual_risk": true,
+      "expected_severity": "high",
+      "expected_scenario": "mfa_bypass_attack",
+      "confidence_threshold": "high",
+      "rationale": "User has 2FA enrolled but accessing from cloud hosting provider (DigitalOcean) typically used for automated attacks. Risk score of 65 with credential stuffing history. New IP and geographic region. Login at 3:15 AM is suspicious timing. Likely MFA bypass tool or stolen credentials."
+    },
+    "metadata": {
+      "difficulty": "medium",
+      "source": "synthetic",
+      "tags": [
+        "mfa",
+        "hosting_provider",
+        "credential_stuffing",
+        "suspicious_timing"
+      ]
+    }
+  },
+  {
+    "case_id": "MFA_006_admin_no_mfa_enforced",
+    "passed": false,
+    "scores": {
+      "risk_correct": false,
+      "prediction_type": "false_negative",
+      "severity_error": 2,
+      "severity_correct": false,
+      "severity_close": false,
+      "confidence": "medium",
+      "overconfidence_penalty": 0.5,
+      "scenario_correct": false,
+      "has_reasoning": true,
+      "reasoning_length": 701,
+      "evidence_citations": 1,
+      "has_recommendations": true,
+      "recommendation_count": 4,
+      "actionable_recommendations": 1,
+      "passed": false,
+      "high_quality": false,
+      "case_difficulty": "hard",
+      "case_tags": [
+        "mfa",
+        "admin_account",
+        "policy_violation",
+        "no_enrollment",
+        "critical_gap"
+      ]
+    },
+    "prediction": {
+      "is_actual_risk": false,
+      "confidence": "medium",
+      "adjusted_severity": "low",
+      "forensic_narrative": "\u26a0\ufe0f LIMITED ANALYSIS: This is a mock response from mfa_context_analyzer because the Anthropic Claude API is not configured.\n\nTo enable full AI-powered forensic analysis:\n1. Obtain an API key from console.anthropic.com/settings/keys\n2. Set the ANTHROPIC_API_KEY environment variable in your system or .env file\n3. Restart the backend server\n\nFull analysis provides:\n\u2022 Detailed forensic reasoning based on contextual enrichment data\n\u2022 High-confidence risk assessments using behavioral baselines\n\u2022 Specific, actionable recommendations tailored to this event\n\u2022 Detection of subtle attack patterns that rule-based systems miss\n\nCurrent assessment: Based on tier-1 detection alone, manual review recommended.",
+      "recommended_actions": [
+        "Configure Anthropic Claude API for full AI analysis (see forensic narrative above)",
+        "Manually review this event using the enrichment data provided",
+        "Cross-reference with other security tools (SIEM, EDR) for additional context",
+        "If user reports issues, investigate immediately regardless of automated assessment"
+      ],
+      "mock_response": true,
+      "anomaly_id": "ANOM-MFA-TEST-006",
+      "agent_name": "mfa_context_analyzer"
+    },
+    "ground_truth": {
+      "is_actual_risk": true,
+      "expected_severity": "high",
+      "expected_scenario": "policy_violation",
+      "confidence_threshold": "high",
+      "rationale": "Admin account without 2FA enrolled and not enforced is a critical security gap. While the current login appears legitimate (clean IP, known location), the lack of MFA on privileged account creates high risk. Should be flagged for immediate remediation even though this specific login isn't malicious."
+    },
+    "metadata": {
+      "difficulty": "hard",
+      "source": "synthetic",
+      "tags": [
+        "mfa",
+        "admin_account",
+        "policy_violation",
+        "no_enrollment",
+        "critical_gap"
+      ]
+    }
+  },
+  {
+    "case_id": "MFA_009_impossible_travel",
+    "passed": false,
+    "scores": {
+      "risk_correct": false,
+      "prediction_type": "false_negative",
+      "severity_error": 3,
+      "severity_correct": false,
+      "severity_close": false,
+      "confidence": "medium",
+      "overconfidence_penalty": 0.5,
+      "scenario_correct": false,
+      "has_reasoning": true,
+      "reasoning_length": 701,
+      "evidence_citations": 1,
+      "has_recommendations": true,
+      "recommendation_count": 4,
+      "actionable_recommendations": 1,
+      "passed": false,
+      "high_quality": false,
+      "case_difficulty": "easy",
+      "case_tags": [
+        "mfa",
+        "impossible_travel",
+        "session_theft",
+        "multiple_locations",
+        "critical"
+      ]
+    },
+    "prediction": {
+      "is_actual_risk": false,
+      "confidence": "medium",
+      "adjusted_severity": "low",
+      "forensic_narrative": "\u26a0\ufe0f LIMITED ANALYSIS: This is a mock response from mfa_context_analyzer because the Anthropic Claude API is not configured.\n\nTo enable full AI-powered forensic analysis:\n1. Obtain an API key from console.anthropic.com/settings/keys\n2. Set the ANTHROPIC_API_KEY environment variable in your system or .env file\n3. Restart the backend server\n\nFull analysis provides:\n\u2022 Detailed forensic reasoning based on contextual enrichment data\n\u2022 High-confidence risk assessments using behavioral baselines\n\u2022 Specific, actionable recommendations tailored to this event\n\u2022 Detection of subtle attack patterns that rule-based systems miss\n\nCurrent assessment: Based on tier-1 detection alone, manual review recommended.",
+      "recommended_actions": [
+        "Configure Anthropic Claude API for full AI analysis (see forensic narrative above)",
+        "Manually review this event using the enrichment data provided",
+        "Cross-reference with other security tools (SIEM, EDR) for additional context",
+        "If user reports issues, investigate immediately regardless of automated assessment"
+      ],
+      "mock_response": true,
+      "anomaly_id": "ANOM-MFA-TEST-009",
+      "agent_name": "mfa_context_analyzer"
+    },
+    "ground_truth": {
+      "is_actual_risk": true,
+      "expected_severity": "critical",
+      "expected_scenario": "session_cookie_theft",
+      "confidence_threshold": "high",
+      "rationale": "Impossible travel: Tokyo to New York in 15 minutes. User has 2FA but accessing from AWS hosting (suspicious). Risk score 55 indicates prior malicious activity. Finance user makes this high-value target. Clear indication of session cookie theft or account compromise."
+    },
+    "metadata": {
+      "difficulty": "easy",
+      "source": "synthetic",
+      "tags": [
+        "mfa",
+        "impossible_travel",
+        "session_theft",
+        "multiple_locations",
+        "critical"
+      ]
+    }
+  }
+]

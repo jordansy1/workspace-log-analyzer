@@ -1,0 +1,36 @@
+{
+  "agent_name": "mfa_context_analyzer",
+  "timestamp": "2025-11-13T15:11:11.089624",
+  "total_cases": 10,
+  "passed_cases": 6,
+  "failed_cases": 4,
+  "metrics": {
+    "total_cases": 10,
+    "confusion_matrix": {
+      "true_positives": 0,
+      "true_negatives": 6,
+      "false_positives": 0,
+      "false_negatives": 4
+    },
+    "core_metrics": {
+      "accuracy": 0.6,
+      "precision": 0,
+      "recall": 0.0,
+      "f1_score": 0
+    },
+    "severity_metrics": {
+      "severity_accuracy": 0.4,
+      "severity_close_accuracy": 0.6
+    },
+    "quality_metrics": {
+      "high_quality_percentage": 0.6,
+      "avg_evidence_citations": 1.0,
+      "overconfidence_score": 0.2
+    },
+    "difficulty_breakdown": {
+      "easy": 0.5,
+      "medium": 0.75,
+      "hard": 0.5
+    }
+  }
+}

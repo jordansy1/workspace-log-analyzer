@@ -77,7 +77,7 @@ class BaseAgent(ABC):
         return {
             'agent_name': self.name,
             'llm_settings': {
-                'model': 'claude-sonnet-4-20250514',
+                'model': 'claude-sonnet-4-5-20250929',
                 'temperature': 0.1,
                 'max_tokens': 4000
             },
@@ -124,10 +124,21 @@ class BaseAgent(ABC):
 
         Returns:
             Parsed JSON response from Claude
+
+        Raises:
+            RuntimeError: If API key is not configured
+            Exception: If API call fails or response cannot be parsed
         """
         if not self.client:
-            # Return mock response if no API key
-            return self._get_mock_response()
+            # Raise error instead of falling back to mock response
+            raise RuntimeError(
+                f"[{self.name}] Anthropic API is not configured.\n\n"
+                "To enable tier-2 analysis:\n"
+                "1. Obtain an API key from https://console.anthropic.com/settings/keys\n"
+                "2. Set the ANTHROPIC_API_KEY environment variable\n"
+                "3. Restart the application\n\n"
+                "Without API access, tier-2 analysis cannot be performed."
+            )
 
         llm_config = self.config.get('llm_settings', {})
 
@@ -149,51 +160,53 @@ class BaseAgent(ABC):
 
             # Try to parse JSON from the response
             # Look for JSON block in markdown code fence or raw JSON
+            json_text = None
+
             if '```json' in response_text:
+                # JSON in markdown code fence with language tag
                 json_start = response_text.find('```json') + 7
                 json_end = response_text.find('```', json_start)
                 json_text = response_text[json_start:json_end].strip()
             elif '```' in response_text:
+                # JSON in markdown code fence without language tag
                 json_start = response_text.find('```') + 3
                 json_end = response_text.find('```', json_start)
                 json_text = response_text[json_start:json_end].strip()
             else:
-                # Assume entire response is JSON
-                json_text = response_text.strip()
+                # No code fence - find the JSON object by looking for first { and last }
+                first_brace = response_text.find('{')
+                last_brace = response_text.rfind('}')
 
-            return json.loads(json_text)
+                if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+                    json_text = response_text[first_brace:last_brace + 1].strip()
+                else:
+                    # Fallback: assume entire response is JSON
+                    json_text = response_text.strip()
 
+            # Try to parse the JSON
+            try:
+                return json.loads(json_text)
+            except json.JSONDecodeError as e:
+                # If parsing fails due to control characters, try with strict=False
+                # This is more lenient with escape sequences
+                try:
+                    return json.loads(json_text, strict=False)
+                except json.JSONDecodeError:
+                    # Still failed - raise original error
+                    raise e
+
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                f"[{self.name}] Failed to parse JSON response from Claude API.\n"
+                f"Error: {str(e)}\n"
+                f"Response text: {response_text[:500]}..."
+            )
         except Exception as e:
-            print(f"[WARNING] LLM call failed: {e}")
-            return self._get_mock_response()
-
-    def _get_mock_response(self) -> Dict[str, Any]:
-        """Provide mock response when API is unavailable."""
-        return {
-            'is_actual_risk': False,
-            'confidence': 'medium',
-            'adjusted_severity': 'low',
-            'forensic_narrative': (
-                f'⚠️ LIMITED ANALYSIS: This is a mock response from {self.name} because the Anthropic Claude API is not configured.\n\n'
-                'To enable full AI-powered forensic analysis:\n'
-                '1. Obtain an API key from console.anthropic.com/settings/keys\n'
-                '2. Set the ANTHROPIC_API_KEY environment variable in your system or .env file\n'
-                '3. Restart the backend server\n\n'
-                'Full analysis provides:\n'
-                '• Detailed forensic reasoning based on contextual enrichment data\n'
-                '• High-confidence risk assessments using behavioral baselines\n'
-                '• Specific, actionable recommendations tailored to this event\n'
-                '• Detection of subtle attack patterns that rule-based systems miss\n\n'
-                'Current assessment: Based on tier-1 detection alone, manual review recommended.'
-            ),
-            'recommended_actions': [
-                'Configure Anthropic Claude API for full AI analysis (see forensic narrative above)',
-                'Manually review this event using the enrichment data provided',
-                'Cross-reference with other security tools (SIEM, EDR) for additional context',
-                'If user reports issues, investigate immediately regardless of automated assessment'
-            ],
-            'mock_response': True
-        }
+            # Re-raise with more context instead of falling back to mock
+            raise RuntimeError(
+                f"[{self.name}] Claude API call failed: {str(e)}\n"
+                "Please check your API key and network connection."
+            ) from e
 
     def validate_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
         """
