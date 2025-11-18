@@ -30,14 +30,13 @@ The tool is a multi-agent AI security analysis system that fetches Google Worksp
 └────────┬────────┘
          │
          ▼
-┌─────────────────┐
-│ analyze_logs.py │  Primary anomaly detection
-└────────┬────────┘
+┌───────────────────────────┐
+│ orchestrator_modular.py   │  Coordinates tier-1 & tier-2 analysis
+└────────┬──────────────────┘
          │
-         ▼
-┌─────────────────────────┐
-│ orchestrator_automated  │  Routes to specialized sub-agents
-└────────┬────────────────┘
+         ├─► tier1_detection/detector.py    (Rule-based anomaly detection)
+         │
+         ├─► tier2_analysis/agent_router.py (AI-powered forensic analysis)
          │
          ▼
 ┌─────────────────────┐
@@ -277,7 +276,7 @@ The web UI consists of two components that work together:
 - **Functions**:
   - Handles Google OAuth authentication flow
   - Executes `fetch_logs.py` to retrieve authentication logs
-  - Runs `orchestrator_automated.py` for tier-2 AI analysis
+  - Runs `orchestrator_modular.py` for tier-2 AI analysis
   - Serves log and analysis data to the frontend
 
 **Frontend (React + Vite)**
@@ -349,25 +348,25 @@ Events are flagged for tier-2 AI analysis if they match ANY of these rule-based 
    - **Criteria**: Login verification events where `is_second_factor` is `false` or `null`
    - **Why flagged**: Could indicate bypassed 2FA or account compromise
    - **Example**: User logs in without completing second factor authentication
-   - **Code location**: `analyze_logs.py:68-85`
+   - **Code location**: `tier1_detection/detection_methods/T1556_006_mfa_bypass_detection.py`
 
 2. **Multiple Geographic Locations**
    - **Criteria**: User authenticates from 2+ different countries/regions in the same session
    - **Why flagged**: Could indicate impossible travel or account sharing
    - **Example**: Login from New York at 10:00 AM, then from London at 10:15 AM
-   - **Code location**: `analyze_logs.py:122-138`
+   - **Code location**: `tier1_detection/detection_methods/T1078_geographic_anomalies_detection.py`
 
 3. **Failed Login Patterns**
    - **Criteria**: One or more `login_failure` events for a user
    - **Why flagged**: Could indicate brute force attack or credential stuffing
    - **Example**: 3 failed login attempts followed by a success
-   - **Code location**: `analyze_logs.py:142-174`
+   - **Code location**: `tier1_detection/detection_methods/T1110_failed_login_detection.py`
 
 4. **Rapid Retry After Failure**
    - **Criteria**: Successful login within 10 seconds of a failed login from same IP
    - **Why flagged**: Extremely fast retry suggests automated attack tools
    - **Example**: Failed login at 10:00:00, success at 10:00:03
-   - **Code location**: `analyze_logs.py:212-227`
+   - **Code location**: `tier1_detection/detection_methods/T1110_rapid_access_detection.py`
 
 **Important**: These are intentionally sensitive patterns that will generate false positives. This is by design - tier-2 AI analysis filters them out.
 
@@ -375,7 +374,7 @@ Events are flagged for tier-2 AI analysis if they match ANY of these rule-based 
 
 When an event is flagged by tier-1 detection, it's routed to a specialized sub-agent for deep contextual analysis:
 
-**Step 1: Sub-Agent Selection** (`orchestrator_automated.py:102-137`)
+**Step 1: Sub-Agent Selection** (`tier2_analysis/agent_router.py`)
 
 Each anomaly type is routed to a specialized sub-agent:
 
@@ -425,7 +424,7 @@ The sub-agent receives a comprehensive data package including:
    - Example for MFA: "Could this be a trusted device scenario?"
    - Example for geographic: "Is this consistent with legitimate travel?"
 
-**Step 3: AI Reasoning** (`orchestrator_automated.py:144-202`)
+**Step 3: AI Reasoning** (`tier2_analysis/agents/`)
 
 The specialized sub-agent (powered by Claude AI) performs structured analysis:
 
@@ -459,7 +458,7 @@ The specialized sub-agent (powered by Claude AI) performs structured analysis:
    - Confirmation that no action is needed (for false positives)
    - Optional preventive measures
 
-**Step 4: Response Integration** (`orchestrator_automated.py:203-230`)
+**Step 4: Response Integration** (`orchestrator_modular.py`)
 
 The orchestrator integrates sub-agent responses back into the anomaly records:
 
@@ -567,7 +566,7 @@ Fetching login logs from the last 24 hours...
 #### Step 2: Run Automated Multi-Agent Analysis
 
 ```bash
-python orchestrator_automated.py logs/auth_logs_20251002_142537.json
+python orchestrator_modular.py logs/auth_logs_20251002_142537.json
 ```
 
 **What happens:**
@@ -748,9 +747,17 @@ workspace_log_analyzer/
 ├── main.py                       # Entry point: fetch and enrich logs (CLI)
 ├── fetch_logs.py                 # Google Workspace API client
 ├── enrichment.py                 # Multi-source data enrichment
-├── analyze_logs.py               # Primary anomaly detection + sub-agent prompts
-├── orchestrator_automated.py     # Automated multi-agent orchestration
+├── orchestrator_modular.py       # Automated multi-agent orchestration
 ├── report_aggregator.py          # Executive report generation
+│
+├── tier1_detection/              # Rule-based anomaly detection
+│   ├── detector.py               # Main detection coordinator
+│   └── detection_methods/        # Individual MITRE ATT&CK-aligned detectors
+│
+├── tier2_analysis/               # AI-powered forensic analysis
+│   ├── agent_router.py           # Routes anomalies to specialized agents
+│   ├── base_agent.py             # Base agent class
+│   └── agents/                   # Specialized analysis agents
 │
 ├── web-ui/                       # Web interface components
 │   ├── backend/                  # FastAPI REST API server
@@ -844,7 +851,7 @@ If no authentication events are found:
 If sub-agent responses aren't being integrated:
 1. Check that `analysis/sub_agent_responses/` directory exists
 2. Manually create sub-agent response files following the format in automated_tasks/
-3. For manual sub-agent execution, use prompts from `orchestrator_automated.py`
+3. For manual sub-agent execution, use prompts from `orchestrator_modular.py`
 
 ## Advanced Usage
 
