@@ -1,6 +1,8 @@
 # Google Workspace Authentication Log Analyzer
 
-A multi-agent AI security analysis system that fetches Google Workspace authentication logs, enriches them with threat intelligence from multiple sources, and uses specialized AI agents to detect and analyze security anomalies with contextual awareness.
+A small leadrning project I've been working on to explore the uses and limits of LLM-based security event investigation using primarily Google Auth logs from Workspace. Developed using Claude Code (mostly Sonnet 4.5) in Cursor.
+
+The tool is a multi-agent AI security analysis system that fetches Google Workspace authentication logs, enriches them with threat intelligence from multiple sources, and uses specialized AI agents to detect and analyze security anomalies with contextual awareness.
 
 ## Features
 
