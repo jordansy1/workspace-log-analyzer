@@ -1,0 +1,354 @@
+{
+  "scenarios": [
+    {
+      "scenario_id": "AMB_MFA_001_trusted_device_home",
+      "description": "Admin user logs in without MFA from home IP - should be low risk due to trusted device context",
+      "detection_type": "missing_mfa",
+      "category": "ambiguous",
+      "complexity": "moderate",
+      "mitre_techniques": ["T1556.006", "T1621"],
+
+      "raw_events": {
+        "events": [
+          {
+            "event_name": "login_success",
+            "timestamp": "2024-01-15T09:30:00Z",
+            "user_email": "admin@company.com",
+            "ip_address": "73.162.45.128",
+            "event_id": "evt-001",
+            "is_suspicious": false,
+            "is_second_factor": false,
+            "login_type": "exchange",
+            "enriched_location": {
+              "city": "Seattle",
+              "region": "Washington",
+              "country": "United States",
+              "loc": "47.6062,-122.3321",
+              "timezone": "America/Los_Angeles",
+              "is_vpn": false,
+              "is_proxy": false,
+              "is_tor": false,
+              "is_hosting": false
+            },
+            "ip_reputation": {
+              "risk_score": 5,
+              "abuse_confidence_score": 0,
+              "is_malicious": false,
+              "threat_types": []
+            },
+            "user_context": {
+              "is_admin": true,
+              "is_2fa_enrolled": true,
+              "is_2fa_enforced": false,
+              "organizational_unit": "/IT"
+            },
+            "baseline_comparison": {
+              "is_known_ip": true,
+              "is_new_ip": false,
+              "is_known_location": true,
+              "is_new_location": false,
+              "typical_ips": ["73.162.45.128", "10.0.1.50"],
+              "deviations": []
+            }
+          }
+        ],
+        "metadata": {
+          "primary_timezone": "America/Los_Angeles",
+          "weekday_start": "08:00",
+          "weekday_end": "18:00"
+        }
+      },
+
+      "enriched_context": {
+        "user_context": {
+          "email": "admin@company.com",
+          "is_admin": true,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": false,
+          "organizational_unit": "/IT"
+        },
+        "ip_reputation": {
+          "ip": "73.162.45.128",
+          "risk_score": 5,
+          "is_malicious": false,
+          "abuse_confidence_score": 0,
+          "threat_types": []
+        },
+        "geolocation": {
+          "city": "Seattle",
+          "region": "Washington",
+          "country": "United States",
+          "isp": "Comcast Cable",
+          "org": "Comcast Cable Communications",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "typical_ips": ["73.162.45.128", "10.0.1.50"],
+          "typical_locations": ["Seattle, WA"],
+          "is_known_ip": true,
+          "is_new_ip": false,
+          "is_known_location": true,
+          "is_new_location": false,
+          "deviations": []
+        }
+      },
+
+      "deterministic_expected": {
+        "detects": true,
+        "severity": "medium",
+        "verdict": "needs_investigation",
+        "verdict_rationale": "Admin without MFA triggers detection, but context shows trusted device"
+      },
+
+      "ground_truth": {
+        "tier1_expected": {
+          "should_detect": true,
+          "expected_severity": "medium",
+          "detection_rationale": "Missing MFA for admin account should be flagged"
+        },
+        "tier2_expected": {
+          "is_actual_risk": false,
+          "expected_severity": "low",
+          "expected_scenario": "trusted_device_home_office",
+          "confidence_threshold": "high",
+          "analysis_rationale": "Known IP, residential ISP, user has 2FA enrolled, no baseline deviations"
+        },
+        "final_verdict": {
+          "is_real_threat": false,
+          "severity": "low",
+          "rationale": "This is the admin working from home on their usual IP. 2FA not triggered due to trusted device cookies.",
+          "expected_agreement": "tier1_only"
+        }
+      },
+
+      "ai_evaluation_criteria": {
+        "should_resolve": true,
+        "expected_verdict": "low_risk",
+        "expected_confidence": "high",
+        "key_evidence_to_cite": ["known_ip", "residential_isp", "2fa_enrolled", "no_deviations"],
+        "good_recommendation_includes": ["verify_trusted_device_policy", "no_immediate_action"]
+      },
+
+      "metadata": {
+        "difficulty": "medium",
+        "source": "synthetic",
+        "tags": ["mfa", "trusted_device", "admin", "false_positive_test"],
+        "tests_ai_capability": ["context_integration", "false_positive_filtering"]
+      }
+    },
+    {
+      "scenario_id": "CLR_THREAT_001_tor_admin_login",
+      "description": "Admin login from Tor exit node - clear threat regardless of other factors",
+      "detection_type": "geographic_anomalies",
+      "category": "clear_threat",
+      "complexity": "simple",
+      "mitre_techniques": ["T1078"],
+
+      "raw_events": {
+        "events": [
+          {
+            "event_name": "login_success",
+            "timestamp": "2024-01-15T14:22:00Z",
+            "user_email": "admin@company.com",
+            "ip_address": "185.220.101.42",
+            "event_id": "evt-002",
+            "is_suspicious": true,
+            "is_second_factor": false,
+            "login_type": "exchange",
+            "enriched_location": {
+              "city": "Frankfurt",
+              "region": "Hessen",
+              "country": "Germany",
+              "loc": "50.1109,8.6821",
+              "timezone": "Europe/Berlin",
+              "is_vpn": false,
+              "is_proxy": false,
+              "is_tor": true,
+              "is_hosting": true
+            },
+            "ip_reputation": {
+              "risk_score": 95,
+              "abuse_confidence_score": 100,
+              "is_malicious": true,
+              "threat_types": ["tor_exit", "anonymous_proxy"]
+            },
+            "user_context": {
+              "is_admin": true,
+              "is_2fa_enrolled": true,
+              "is_2fa_enforced": false,
+              "organizational_unit": "/IT"
+            },
+            "baseline_comparison": {
+              "is_known_ip": false,
+              "is_new_ip": true,
+              "is_known_location": false,
+              "is_new_location": true,
+              "typical_ips": ["73.162.45.128"],
+              "deviations": ["new_ip", "new_location", "tor_detected"]
+            }
+          }
+        ],
+        "metadata": {
+          "primary_timezone": "America/Los_Angeles",
+          "weekday_start": "08:00",
+          "weekday_end": "18:00"
+        }
+      },
+
+      "enriched_context": {
+        "user_context": {
+          "email": "admin@company.com",
+          "is_admin": true,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": false
+        },
+        "ip_reputation": {
+          "ip": "185.220.101.42",
+          "risk_score": 95,
+          "is_malicious": true,
+          "abuse_confidence_score": 100,
+          "threat_types": ["tor_exit", "anonymous_proxy"]
+        },
+        "geolocation": {
+          "city": "Frankfurt",
+          "region": "Hessen",
+          "country": "Germany",
+          "isp": "Tor Exit Node",
+          "org": "Tor Project",
+          "is_tor": true,
+          "is_vpn": false,
+          "is_proxy": false,
+          "is_hosting": true
+        },
+        "baseline": {
+          "typical_ips": ["73.162.45.128"],
+          "typical_locations": ["Seattle, WA"],
+          "is_known_ip": false,
+          "is_new_ip": true,
+          "is_known_location": false,
+          "is_new_location": true,
+          "deviations": ["new_ip", "new_location", "tor_detected"]
+        }
+      },
+
+      "deterministic_expected": {
+        "detects": true,
+        "severity": "critical",
+        "verdict": "clear_threat",
+        "verdict_rationale": "Tor exit node + admin account = clear threat"
+      },
+
+      "ground_truth": {
+        "final_verdict": {
+          "is_real_threat": true,
+          "severity": "critical",
+          "rationale": "Admin account accessed from Tor exit node with malicious IP reputation. This is credential compromise.",
+          "expected_agreement": "both_detect"
+        }
+      },
+
+      "metadata": {
+        "difficulty": "easy",
+        "source": "synthetic",
+        "tags": ["tor", "admin", "clear_threat", "credential_compromise"]
+      }
+    },
+    {
+      "scenario_id": "CLR_BENIGN_001_normal_login",
+      "description": "Standard user login from known location with MFA - clearly benign",
+      "detection_type": "missing_mfa",
+      "category": "clear_benign",
+      "complexity": "simple",
+
+      "raw_events": {
+        "events": [
+          {
+            "event_name": "login_success",
+            "timestamp": "2024-01-15T10:00:00Z",
+            "user_email": "user@company.com",
+            "ip_address": "10.0.1.50",
+            "event_id": "evt-003",
+            "is_suspicious": false,
+            "is_second_factor": true,
+            "login_type": "saml",
+            "enriched_location": {
+              "city": "Seattle",
+              "region": "Washington",
+              "country": "United States",
+              "is_vpn": false,
+              "is_tor": false,
+              "is_hosting": false
+            },
+            "ip_reputation": {
+              "risk_score": 0,
+              "is_malicious": false
+            },
+            "user_context": {
+              "is_admin": false,
+              "is_2fa_enrolled": true,
+              "is_2fa_enforced": true
+            },
+            "baseline_comparison": {
+              "is_known_ip": true,
+              "is_known_location": true,
+              "deviations": []
+            }
+          }
+        ],
+        "metadata": {
+          "primary_timezone": "America/Los_Angeles"
+        }
+      },
+
+      "enriched_context": {
+        "user_context": {
+          "email": "user@company.com",
+          "is_admin": false,
+          "is_2fa_enrolled": true,
+          "is_2fa_enforced": true
+        },
+        "ip_reputation": {
+          "risk_score": 0,
+          "is_malicious": false
+        },
+        "geolocation": {
+          "city": "Seattle",
+          "country": "United States",
+          "is_tor": false,
+          "is_vpn": false,
+          "is_hosting": false
+        },
+        "baseline": {
+          "is_known_ip": true,
+          "is_known_location": true,
+          "deviations": []
+        }
+      },
+
+      "deterministic_expected": {
+        "detects": false,
+        "severity": null,
+        "verdict": "clear_benign",
+        "verdict_rationale": "MFA performed, known IP, no anomalies"
+      },
+
+      "ground_truth": {
+        "final_verdict": {
+          "is_real_threat": false,
+          "severity": "none",
+          "rationale": "Normal user login with MFA from corporate network",
+          "expected_agreement": "both_dismiss"
+        }
+      },
+
+      "metadata": {
+        "difficulty": "easy",
+        "source": "synthetic",
+        "tags": ["normal", "mfa_present", "baseline_test"]
+      }
+    }
+  ]
+}
