@@ -193,7 +193,7 @@ export default function EventsTable({ events, onEventClick }: EventsTableProps) 
           value={globalFilter ?? ''}
           onChange={(e) => setGlobalFilter(e.target.value)}
           placeholder="Search all columns..."
-          className="w-full max-w-sm border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full max-w-sm border border-gray-300 rounded-md px-4 py-2 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
