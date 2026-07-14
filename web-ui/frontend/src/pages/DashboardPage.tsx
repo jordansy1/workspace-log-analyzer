@@ -188,7 +188,7 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Controls */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-end gap-4 flex-wrap">
             <div className="flex-1 min-w-[200px]">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -198,7 +198,7 @@ export default function DashboardPage() {
               <select
                 value={hoursBack}
                 onChange={(e) => setHoursBack(Number(e.target.value))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 disabled={fetchLogsMutation.isPending}
               >
                 <option value={1}>Last 1 hour</option>
@@ -304,25 +304,25 @@ export default function DashboardPage() {
         {/* Stats */}
         {logData && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-white rounded-lg shadow-sm p-4">
               <p className="text-sm text-gray-600">Total Events</p>
               <p className="text-2xl font-bold text-gray-900">
                 {logData.metadata.total_events}
               </p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-white rounded-lg shadow-sm p-4">
               <p className="text-sm text-gray-600">Unique Users</p>
               <p className="text-2xl font-bold text-gray-900">
                 {logData.metadata.summary.unique_users}
               </p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-white rounded-lg shadow-sm p-4">
               <p className="text-sm text-gray-600">Unique IPs</p>
               <p className="text-2xl font-bold text-gray-900">
                 {logData.metadata.summary.unique_ips}
               </p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-white rounded-lg shadow-sm p-4">
               <p className="text-sm text-gray-600">Suspicious Events</p>
               <p className="text-2xl font-bold text-red-600">{suspiciousCount}</p>
             </div>
@@ -331,7 +331,7 @@ export default function DashboardPage() {
 
         {/* Events Table */}
         {logData && (
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-white rounded-lg shadow-sm">
             <EventsTable
               events={eventsWithAnomalies}
               onEventClick={handleEventClick}
@@ -341,7 +341,7 @@ export default function DashboardPage() {
 
         {/* Empty State */}
         {!logData && !fetchLogsMutation.isPending && (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
             <Shield className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No logs loaded</h3>
             <p className="text-gray-600 mb-6">

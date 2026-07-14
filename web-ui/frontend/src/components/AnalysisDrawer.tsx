@@ -29,7 +29,7 @@ export default function AnalysisDrawer({ isOpen, onClose, event, anomaly }: Anal
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
         onClick={onClose}
       />
 
@@ -164,7 +164,7 @@ export default function AnalysisDrawer({ isOpen, onClose, event, anomaly }: Anal
               <div className="flex items-center gap-2 mb-3">
                 <Search className="w-5 h-5 text-indigo-600" />
                 <h3 className="font-semibold text-indigo-900">Tier-1 Detection Details</h3>
-                <span className="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
+                <span className="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-sm text-xs font-medium">
                   Deterministic Analysis
                 </span>
               </div>
@@ -181,7 +181,7 @@ export default function AnalysisDrawer({ isOpen, onClose, event, anomaly }: Anal
                 {/* Anomaly ID */}
                 <div>
                   <span className="font-medium text-indigo-900">Anomaly ID:</span>{' '}
-                  <code className="text-xs bg-indigo-100 px-2 py-1 rounded text-indigo-800">
+                  <code className="text-xs bg-indigo-100 px-2 py-1 rounded-sm text-indigo-800">
                     {anomaly.id}
                   </code>
                 </div>
@@ -196,7 +196,7 @@ export default function AnalysisDrawer({ isOpen, onClose, event, anomaly }: Anal
                       {anomaly.mitre_attack.map((technique) => (
                         <span
                           key={technique}
-                          className="px-2 py-1 bg-indigo-600 text-white rounded text-xs font-mono"
+                          className="px-2 py-1 bg-indigo-600 text-white rounded-sm text-xs font-mono"
                         >
                           {technique}
                         </span>
@@ -238,11 +238,11 @@ export default function AnalysisDrawer({ isOpen, onClose, event, anomaly }: Anal
 
           {/* Tier-2 AI Agent Analysis */}
           {anomaly?.tier2_analysis && (
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-lg p-4">
+            <div className="bg-linear-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Brain className="w-5 h-5 text-blue-600" />
                 <h3 className="font-semibold text-blue-900">Tier-2 AI Agent Analysis</h3>
-                <span className="ml-auto px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-medium flex items-center gap-1">
+                <span className="ml-auto px-2 py-0.5 bg-blue-600 text-white rounded-sm text-xs font-medium flex items-center gap-1">
                   <Zap className="w-3 h-3" />
                   AI-Powered
                 </span>
@@ -258,7 +258,7 @@ export default function AnalysisDrawer({ isOpen, onClose, event, anomaly }: Anal
                   <div className="space-y-2 text-xs">
                     <div>
                       <span className="font-medium text-blue-800">Agent Name:</span>{' '}
-                      <code className="bg-blue-100 px-2 py-0.5 rounded text-blue-900">
+                      <code className="bg-blue-100 px-2 py-0.5 rounded-sm text-blue-900">
                         {anomaly.tier2_analysis.agent_name}
                       </code>
                     </div>
@@ -307,23 +307,23 @@ export default function AnalysisDrawer({ isOpen, onClose, event, anomaly }: Anal
                     </p>
                     <ul className="space-y-1.5 text-xs text-blue-800">
                       <li className="flex items-start gap-2">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
                         <span><strong>IP Reputation Analysis:</strong> Checked against AbuseIPDB and VirusTotal threat intelligence feeds</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
                         <span><strong>Geolocation Context:</strong> Evaluated access patterns and travel feasibility</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
                         <span><strong>User Behavior Baseline:</strong> Compared against historical login patterns for this user</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
                         <span><strong>Organizational Context:</strong> Considered user role, permissions, and device trust status</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
                         <span><strong>Temporal Analysis:</strong> Examined timing patterns and sequence of events</span>
                       </li>
                     </ul>
