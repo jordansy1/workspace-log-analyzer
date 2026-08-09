@@ -20,7 +20,7 @@ ipaddress==1.0.23
 geopy==2.4.1
 
 # Timezone handling
-pytz==2024.1
+pytz==2026.1.post1
 
 # Configuration parsing (YAML)
 PyYAML==6.0.1
