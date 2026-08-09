@@ -1,0 +1,402 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UnifiedTestScenario",
+  "description": "Schema for comparison testing scenarios that evaluate deterministic vs AI detection",
+  "type": "object",
+  "required": ["scenario_id", "detection_type", "category", "raw_events", "ground_truth"],
+  "properties": {
+    "scenario_id": {
+      "type": "string",
+      "description": "Unique identifier for the scenario (e.g., 'AMB_MFA_001_trusted_device')",
+      "pattern": "^[A-Z]+_[A-Z]+_[0-9]{3}_[a-z_]+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what this scenario tests"
+    },
+    "detection_type": {
+      "type": "string",
+      "description": "Type of detection being tested",
+      "enum": [
+        "missing_mfa",
+        "mfa_fatigue",
+        "failed_login",
+        "rapid_access",
+        "password_spray",
+        "credential_stuffing",
+        "impossible_travel",
+        "geographic_anomalies",
+        "session_anomalies",
+        "session_cookie_hijacking",
+        "off_hours_access",
+        "account_manipulation",
+        "google_suspicious",
+        "oauth_token_abuse",
+        "stolen_oauth_token",
+        "malicious_oauth_app"
+      ]
+    },
+    "category": {
+      "type": "string",
+      "description": "Scenario category for analysis",
+      "enum": ["clear_threat", "clear_benign", "ambiguous"]
+    },
+    "complexity": {
+      "type": "string",
+      "description": "Complexity level for difficulty stratification",
+      "enum": ["simple", "moderate", "complex"]
+    },
+    "mitre_techniques": {
+      "type": "array",
+      "description": "Relevant MITRE ATT&CK techniques",
+      "items": {
+        "type": "string",
+        "pattern": "^T[0-9]{4}(\\.[0-9]{3})?$"
+      }
+    },
+    "raw_events": {
+      "type": "object",
+      "description": "Raw authentication events for tier-1 detection",
+      "required": ["events"],
+      "properties": {
+        "events": {
+          "type": "array",
+          "description": "List of authentication events",
+          "items": {
+            "type": "object",
+            "required": ["event_name", "timestamp", "user_email"],
+            "properties": {
+              "event_name": {
+                "type": "string",
+                "description": "Type of event (e.g., 'login_success', 'login_failure')"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO-8601 timestamp"
+              },
+              "user_email": {
+                "type": "string",
+                "format": "email",
+                "description": "User's email address"
+              },
+              "ip_address": {
+                "type": "string",
+                "description": "Source IP address"
+              },
+              "event_id": {
+                "type": "string",
+                "description": "Unique event identifier"
+              },
+              "is_suspicious": {
+                "type": "boolean",
+                "description": "Google's internal suspicious flag"
+              },
+              "is_second_factor": {
+                "type": "boolean",
+                "description": "Whether MFA was performed"
+              },
+              "login_type": {
+                "type": "string",
+                "description": "Type of login (e.g., 'exchange', 'saml', 'reauth')"
+              },
+              "login_challenge_method": {
+                "type": "string",
+                "description": "MFA challenge method used"
+              },
+              "enriched_location": {
+                "type": "object",
+                "description": "Geolocation data",
+                "properties": {
+                  "city": { "type": "string" },
+                  "region": { "type": "string" },
+                  "country": { "type": "string" },
+                  "loc": {
+                    "type": "string",
+                    "pattern": "^-?[0-9.]+,-?[0-9.]+$",
+                    "description": "Lat,lon coordinates"
+                  },
+                  "timezone": { "type": "string" },
+                  "is_vpn": { "type": "boolean" },
+                  "is_proxy": { "type": "boolean" },
+                  "is_tor": { "type": "boolean" },
+                  "is_hosting": { "type": "boolean" }
+                }
+              },
+              "ip_reputation": {
+                "type": "object",
+                "description": "IP reputation data",
+                "properties": {
+                  "risk_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+                  "abuse_confidence_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+                  "is_malicious": { "type": "boolean" },
+                  "threat_types": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                }
+              },
+              "user_context": {
+                "type": "object",
+                "description": "User context data",
+                "properties": {
+                  "is_admin": { "type": "boolean" },
+                  "is_2fa_enrolled": { "type": "boolean" },
+                  "is_2fa_enforced": { "type": "boolean" },
+                  "organizational_unit": { "type": "string" }
+                }
+              },
+              "baseline_comparison": {
+                "type": "object",
+                "description": "Baseline deviation data",
+                "properties": {
+                  "is_known_ip": { "type": "boolean" },
+                  "is_new_ip": { "type": "boolean" },
+                  "is_known_location": { "type": "boolean" },
+                  "is_new_location": { "type": "boolean" },
+                  "typical_ips": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "deviations": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Event metadata",
+          "properties": {
+            "primary_timezone": { "type": "string" },
+            "weekday_start": { "type": "string" },
+            "weekday_end": { "type": "string" },
+            "log_date_range": { "type": "string" }
+          }
+        }
+      }
+    },
+    "enriched_context": {
+      "type": "object",
+      "description": "Enriched context data for tier-2 analysis",
+      "properties": {
+        "user_context": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "string", "format": "email" },
+            "is_admin": { "type": "boolean" },
+            "is_2fa_enrolled": { "type": "boolean" },
+            "is_2fa_enforced": { "type": "boolean" },
+            "organizational_unit": { "type": "string" }
+          }
+        },
+        "ip_reputation": {
+          "type": "object",
+          "properties": {
+            "ip": { "type": "string" },
+            "risk_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "is_malicious": { "type": "boolean" },
+            "abuse_confidence_score": { "type": "integer" },
+            "threat_types": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "geolocation": {
+          "type": "object",
+          "properties": {
+            "city": { "type": "string" },
+            "region": { "type": "string" },
+            "country": { "type": "string" },
+            "isp": { "type": "string" },
+            "org": { "type": "string" },
+            "is_tor": { "type": "boolean" },
+            "is_vpn": { "type": "boolean" },
+            "is_proxy": { "type": "boolean" },
+            "is_hosting": { "type": "boolean" }
+          }
+        },
+        "baseline": {
+          "type": "object",
+          "properties": {
+            "typical_ips": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "typical_locations": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "is_known_ip": { "type": "boolean" },
+            "is_new_ip": { "type": "boolean" },
+            "is_known_location": { "type": "boolean" },
+            "is_new_location": { "type": "boolean" },
+            "deviations": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "deterministic_expected": {
+      "type": "object",
+      "description": "Expected tier-1 behavior",
+      "properties": {
+        "detects": {
+          "type": "boolean",
+          "description": "Should tier-1 detect this?"
+        },
+        "severity": {
+          "type": ["string", "null"],
+          "enum": [null, "low", "medium", "high", "critical"]
+        },
+        "verdict": {
+          "type": "string",
+          "enum": ["clear_threat", "clear_benign", "needs_investigation"],
+          "description": "Expected tier-1 verdict"
+        },
+        "verdict_rationale": {
+          "type": "string",
+          "description": "Why tier-1 should reach this verdict"
+        }
+      }
+    },
+    "ground_truth": {
+      "type": "object",
+      "description": "Ground truth for evaluation",
+      "required": ["final_verdict"],
+      "properties": {
+        "tier1_expected": {
+          "type": "object",
+          "properties": {
+            "should_detect": { "type": "boolean" },
+            "expected_severity": {
+              "type": ["string", "null"],
+              "enum": [null, "low", "medium", "high", "critical"]
+            },
+            "detection_rationale": { "type": "string" }
+          }
+        },
+        "tier2_expected": {
+          "type": "object",
+          "properties": {
+            "is_actual_risk": { "type": "boolean" },
+            "expected_severity": {
+              "type": "string",
+              "enum": ["low", "medium", "high", "critical"]
+            },
+            "expected_scenario": { "type": "string" },
+            "confidence_threshold": {
+              "type": "string",
+              "enum": ["low", "medium", "high"]
+            },
+            "analysis_rationale": { "type": "string" }
+          }
+        },
+        "final_verdict": {
+          "type": "object",
+          "required": ["is_real_threat", "severity"],
+          "properties": {
+            "is_real_threat": {
+              "type": "boolean",
+              "description": "Ground truth: is this a real threat?"
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["none", "low", "medium", "high", "critical"],
+              "description": "Ground truth severity"
+            },
+            "rationale": {
+              "type": "string",
+              "description": "Why this is the correct verdict"
+            },
+            "expected_agreement": {
+              "type": "string",
+              "enum": ["both_detect", "both_dismiss", "tier1_only", "tier2_only"],
+              "description": "Expected tier agreement pattern"
+            }
+          }
+        }
+      }
+    },
+    "ai_evaluation_criteria": {
+      "type": "object",
+      "description": "Criteria for evaluating AI performance",
+      "properties": {
+        "should_resolve": {
+          "type": "boolean",
+          "description": "Should AI confidently resolve this?"
+        },
+        "expected_verdict": {
+          "type": "string",
+          "enum": ["high_risk", "medium_risk", "low_risk", "benign"]
+        },
+        "expected_confidence": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "key_evidence_to_cite": {
+          "type": "array",
+          "description": "Evidence AI should cite in reasoning",
+          "items": { "type": "string" }
+        },
+        "good_recommendation_includes": {
+          "type": "array",
+          "description": "Recommendations AI should provide",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Scenario metadata",
+      "properties": {
+        "difficulty": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"]
+        },
+        "source": {
+          "type": "string",
+          "enum": ["synthetic", "real", "red_team"],
+          "description": "Origin of the test data"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "threshold_test": {
+          "type": "object",
+          "description": "For threshold boundary testing",
+          "properties": {
+            "threshold_name": { "type": "string" },
+            "threshold_value": { "type": "number" },
+            "test_type": {
+              "type": "string",
+              "enum": ["at_threshold", "below_threshold", "above_threshold", "boundary"]
+            }
+          }
+        },
+        "tests_ai_capability": {
+          "type": "array",
+          "description": "AI capabilities being tested",
+          "items": {
+            "type": "string",
+            "enum": [
+              "context_integration",
+              "false_positive_filtering",
+              "threat_classification",
+              "severity_adjustment",
+              "recommendation_specificity",
+              "reasoning_quality"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
